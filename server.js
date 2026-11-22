@@ -712,9 +712,8 @@ app.post('/api/auth/cadastro', (req, res) => {
   }
 
 
-  // Criar lote inicial exclusivo para este novo produtor
-  const primeiroLote = criarLoteBoasVindas(novoUsuario.id, animalPrincipal || 'bovino');
-  db.lotes.push(primeiroLote);
+  // Novos usuários iniciam com a plataforma 100% limpa (sem nenhum lote fictício cadastrado)
+  // O próprio produtor cadastra seus lotes reais quando desejar através do botão "+ Novo Lote"
 
   // Gerar sessão
   const token = gerarToken(novoUsuario.id);
