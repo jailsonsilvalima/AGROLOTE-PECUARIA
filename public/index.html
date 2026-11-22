@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AgroLote - Contabilidade e Lucro de Lotes de Animais (Nordeste)</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            agro: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    @media print {
+      nav, .no-print, button, #select-lote { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .print-only { display: block !important; }
+      main { max-width: 100% !important; padding: 0 !important; }
+      #aba-relatorios { display: block !important; }
+      .shadow-sm, .shadow-md, .shadow-2xl { box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- NAVBAR SUPERIOR -->
+  <nav class="bg-emerald-900 text-white shadow-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo e Título -->
+        <div class="flex items-center gap-3">
+          <div id="nav-animal-icone" class="w-10 h-10 rounded-xl bg-emerald-800/80 border border-emerald-500/40 flex items-center justify-center text-2xl shadow-inner transition-transform">
+            🐂
+          </div>
+          <div>
+            <div class="font-bold text-lg leading-tight flex items-center gap-2">
+              AgroLote
+              <span class="text-[10px] bg-emerald-500/30 text-emerald-300 font-semibold px-2 py-0.5 rounded-full border border-emerald-400/30 uppercase tracking-wide">
+                Nordeste
+              </span>
+            </div>
+            <p class="text-xs text-emerald-200">Gado, Porco, Carneiro, Bode & Aves</p>
+          </div>
+        </div>
+
+        <!-- Seletor de Lote e Ações -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="relative">
+            <select id="select-lote" onchange="trocarLote(this.value)" class="bg-emerald-800 border border-emerald-600 text-white text-xs sm:text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 pr-8 font-medium">
+              <!-- Preenchido via JS -->
+            </select>
+          </div>
+
+          <button onclick="abrirModalNovoLote()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm">
+            <span>+</span> <span class="hidden sm:inline">Novo Lote</span>
+          </button>
+
+          <a href="/api/backup" download="backup_pecuaria.json" title="Baixar Backup dos Meus Dados" class="p-1.5 text-emerald-200 hover:text-white rounded-lg hover:bg-emerald-800 text-sm transition-colors">
+            💾
+          </a>
+
+          <!-- BOTÃO GERENCIAR CÓDIGOS DE CONVITE -->
+          <button onclick="abrirModalConvites()" title="Gerenciar Códigos de Convite de Acesso" class="px-2 py-1.5 text-amber-300 hover:text-white rounded-lg hover:bg-emerald-800 text-xs transition-colors flex items-center gap-1 font-semibold border border-amber-400/40 bg-emerald-950/40">
+            <span>🔑</span> <span class="hidden md:inline">Convites</span>
+          </button>
+
+          <!-- ÁREA DE AUTENTICAÇÃO / USUÁRIO (MULTI-USUÁRIO) -->
+          <div id="nav-user-area" class="flex items-center border-l border-emerald-700/70 pl-2 sm:pl-3 ml-1">
+            <div id="nav-auth-deslogado" class="flex items-center gap-1.5">
+              <button onclick="abrirModalAuth('login')" class="text-xs text-emerald-100 hover:text-white hover:bg-emerald-800 px-2.5 py-1.5 rounded-lg font-medium transition-colors">
+                Entrar
+              </button>
+              <button onclick="abrirModalAuth('cadastro')" class="text-xs bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-3 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1">
+                <span>⭐</span> <span class="hidden md:inline">Criar Minha Planilha</span><span class="md:hidden">Cadastrar</span>
+              </button>
+            </div>
+
+            <div id="nav-auth-logado" class="hidden items-center gap-2">
+              <div class="flex items-center gap-1.5 bg-emerald-800/90 px-2.5 py-1 rounded-lg border border-emerald-600/70 shadow-inner">
+                <span class="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">👤</span>
+                <span id="nav-user-nome" class="text-xs font-semibold text-white max-w-[110px] sm:max-w-[160px] truncate">Produtor</span>
+              </div>
+              <button onclick="fazerLogout()" title="Sair da Conta" class="text-xs text-emerald-300 hover:text-red-300 hover:bg-emerald-800 px-2 py-1.5 rounded-lg transition-colors font-medium flex items-center gap-1">
+                <span>🚪</span> <span class="hidden sm:inline">Sair</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </nav>
+
+  <!-- BANNER INTELIGENTE DE STATUS / DEMONSTRAÇÃO (SOMENTE LEITURA) -->
+  <div id="banner-visitante" class="bg-gradient-to-r from-amber-600 via-emerald-700 to-teal-800 text-white text-xs py-2 px-4 shadow-inner">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2 text-center sm:text-left">
+        <span class="text-base">🔒</span>
+        <span><strong>Modo Demonstração (Somente Leitura):</strong> Você está visualizando uma prévia de como o sistema funciona. Não é possível alterar dados neste modo. Para cadastrar e gerenciar seus próprios animais, <strong>solicite um código e cadastre-se</strong>!</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="abrirModalAuth('cadastro')" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-3.5 py-1 rounded-lg shadow transition-colors whitespace-nowrap text-xs flex items-center gap-1">
+          <span>🔑</span> Cadastrar com Código →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA DE SELEÇÃO RÁPIDA DE ANIMAIS TÍPICOS -->
+  <div class="bg-white border-b border-slate-200 py-2.5 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 overflow-x-auto text-xs">
+      <span class="text-slate-400 font-semibold uppercase tracking-wider shrink-0 hidden md:inline">
+        Animais da Região:
+      </span>
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+        <button onclick="filtrarOuCriar('bovino')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors">
+          <span>🐂</span> <strong>Bovino</strong> <span class="text-slate-400 text-[11px]">(Nelore/Sindi)</span>
+        </button>
+        <button onclick="filtrarOuCriar('suino')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors">
+          <span>🐖</span> <strong>Suíno</strong> <span class="text-slate-400 text-[11px]">(Caipira/Moura)</span>
+        </button>
+        <button onclick="filtrarOuCriar('ovino')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors">
+          <span>🐑</span> <strong>Ovino</strong> <span class="text-slate-400 text-[11px]">(Santa Inês)</span>
+        </button>
+        <button onclick="filtrarOuCriar('caprino')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors">
+          <span>🐐</span> <strong>Caprino</strong> <span class="text-slate-400 text-[11px]">(Moxotó/Bode)</span>
+        </button>
+        <button onclick="filtrarOuCriar('avicola')" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors">
+          <span>🐓</span> <strong>Aves</strong> <span class="text-slate-400 text-[11px]">(Frango Caipira)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+    <!-- BARRA DE STATUS DO LOTE SELECIONADO -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex items-start gap-3">
+        <div id="lote-icone-badge" class="w-12 h-12 rounded-2xl bg-emerald-100/70 border border-emerald-300/60 flex items-center justify-center text-3xl shrink-0">
+          🐂
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 id="lote-titulo" class="text-xl sm:text-2xl font-bold text-slate-900">Carregando lote...</h2>
+            <span id="lote-especie-badge" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              Bovinos
+            </span>
+            <span id="lote-status-badge" class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
+              Ativo
+            </span>
+          </div>
+          <p id="lote-subtitulo" class="text-xs sm:text-sm text-slate-500 mt-1">
+            Lote com 6 animais • Ciclo de 120 dias
+          </p>
+        </div>
+      </div>
+
+      <!-- Barra de Progresso do Ciclo -->
+      <div class="w-full md:w-80 bg-slate-50 border border-slate-200 rounded-xl p-3">
+        <div class="flex justify-between items-center text-xs text-slate-600 mb-1 font-medium">
+          <span id="txt-progresso-dias">Dia 30 de 120 dias</span>
+          <span id="txt-progresso-pct" class="font-bold text-emerald-700">25%</span>
+        </div>
+        <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+          <div id="barra-progresso" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-500" style="width: 25%"></div>
+        </div>
+        <div class="flex justify-between items-center text-[11px] text-slate-400 mt-1">
+          <span id="txt-data-entrada">Início: 01/01/2026</span>
+          <span id="txt-data-abate">Abate: 01/05/2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINEL DE RESUMO EXECUTIVO REAL: ESTUDO DE CASO DE 5 ANIMAIS -->
+    <div class="bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-emerald-500/30 relative overflow-hidden">
+      <!-- Efeito de brilho de fundo -->
+      <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-emerald-700/60 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-2xl shadow-inner">
+            🐂
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-[11px] bg-amber-400 text-slate-950 font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Exemplo Real de Mercado
+              </span>
+              <span class="text-xs text-emerald-300 font-semibold">Índices Zootécnicos Reais (Embrapa / Cepea / B3)</span>
+            </div>
+            <h3 class="text-lg sm:text-xl font-bold mt-0.5">Engorda Confinada de 5 Garrotes Nelore (Ciclo de 90 Dias)</h3>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-700/50 text-xs">
+          <span class="text-emerald-400 font-bold">Lote Padrão:</span>
+          <span>5 cabeças • 360 kg entrada ➔ 510 kg abate</span>
+        </div>
+      </div>
+
+      <!-- 4 Passos do Ciclo Real -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 text-xs">
+        
+        <!-- Passo 1 -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
+          <div class="text-[11px] font-bold text-emerald-400 uppercase tracking-wide flex items-center justify-between">
+            <span>1. Compra do Magro</span>
+            <span class="text-slate-400 font-normal">Entrada</span>
+          </div>
+          <div class="text-base font-extrabold text-white mt-1">R$ 2.550,00 <span class="text-xs text-slate-300 font-normal">/ cab</span></div>
+          <p class="text-[11px] text-slate-300 mt-1">Peso entrada: <strong>360 kg (12@)</strong> + Frete R$ 80/cab. Investimento inicial total: R$ 13.150,00.</p>
+        </div>
+
+        <!-- Passo 2 -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
+          <div class="text-[11px] font-bold text-amber-300 uppercase tracking-wide flex items-center justify-between">
+            <span>2. Trato e Ração</span>
+            <span class="text-slate-400 font-normal">90 dias</span>
+          </div>
+          <div class="text-base font-extrabold text-white mt-1">R$ 12,18 <span class="text-xs text-slate-300 font-normal">/ dia / cab</span></div>
+          <p class="text-[11px] text-slate-300 mt-1">Silagem nobre + Ração 18% PB + Núcleo mineral. Ganho diário real: <strong>+1,65 kg/dia</strong>.</p>
+        </div>
+
+        <!-- Passo 3 -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
+          <div class="text-[11px] font-bold text-sky-300 uppercase tracking-wide flex items-center justify-between">
+            <span>3. Saída no Abate</span>
+            <span class="text-slate-400 font-normal">54% rendimento</span>
+          </div>
+          <div class="text-base font-extrabold text-white mt-1">18,36 Arrobas (@) <span class="text-xs text-slate-300 font-normal">/ boi</span></div>
+          <p class="text-[11px] text-slate-300 mt-1">Peso final de <strong>510 kg vivo</strong> (275,4 kg carne limpa). Venda a <strong>R$ 248,00/@</strong> = R$ 4.553,28/cab.</p>
+        </div>
+
+        <!-- Passo 4 -->
+        <div class="bg-emerald-500/20 border border-emerald-400/40 rounded-2xl p-3.5 backdrop-blur-sm">
+          <div class="text-[11px] font-bold text-emerald-300 uppercase tracking-wide flex items-center justify-between">
+            <span>4. Lucro no Bolso</span>
+            <span class="bg-emerald-400 text-slate-950 font-black px-1.5 py-0.2 rounded text-[10px]">ROI 18,5%</span>
+          </div>
+          <div class="text-base font-black text-emerald-300 mt-1">+R$ 3.558,90 <span class="text-xs text-slate-200 font-normal">total</span></div>
+          <p class="text-[11px] text-emerald-100 mt-1"><strong>+R$ 711,78 de lucro líquido por boi</strong> limpo após abater compra, ração, remédios e fretes!</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CARDS DE MÉTRICAS E RESULTADOS FINANCEIROS (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <!-- CARD 1: CUSTO TOTAL ACUMULADO -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Custo Total Acumulado</div>
+        <div id="card-custo-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">R$ 0,00</div>
+        <div class="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
+          <span>Por cabeça:</span>
+          <span id="card-custo-cabeca" class="font-semibold text-slate-700">R$ 0,00</span>
+        </div>
+      </div>
+
+      <!-- CARD 2: GASTO COM RAÇÃO -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ração & Nutrição</div>
+        <div id="card-total-racao" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">R$ 0,00</div>
+        <div class="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
+          <span>Diária alimentar:</span>
+          <span id="card-diaria-cabeca" class="font-semibold text-slate-700">R$ 0,00 / dia</span>
+        </div>
+      </div>
+
+      <!-- CARD 3: MEDICAMENTOS E SAÚDE -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Medicamentos & Vacinas</div>
+        <div id="card-total-med" class="text-2xl sm:text-3xl font-extrabold text-blue-600 mt-1">R$ 0,00</div>
+        <div class="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
+          <span>Custo sanitário:</span>
+          <span id="card-med-cabeca" class="font-semibold text-slate-700">R$ 0,00 / animal</span>
+        </div>
+      </div>
+
+      <!-- CARD 4: LUCRO LÍQUIDO FINAL -->
+      <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/40 border-2 border-emerald-500/40 rounded-2xl p-5 shadow-sm relative">
+        <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Lucro Líquido do Lote</div>
+        <div id="card-lucro-total" class="text-2xl sm:text-3xl font-black text-emerald-700 mt-1">R$ 0,00</div>
+        <div class="flex items-center justify-between text-xs text-emerald-800 mt-2 pt-2 border-t border-emerald-200/60 font-medium">
+          <span>Lucro por animal:</span>
+          <span id="card-lucro-cabeca" class="font-bold text-emerald-900 text-sm">R$ 0,00</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NAVEGAÇÃO ENTRE ABAS -->
+    <div class="border-b border-slate-200 flex gap-2 sm:gap-6 overflow-x-auto text-sm font-semibold">
+      <button onclick="mudarAba('racao')" id="tab-btn-racao" class="pb-3 px-2 border-b-2 border-emerald-600 text-emerald-700 flex items-center gap-1.5 whitespace-nowrap">
+        <span>🌾</span> Ração & Insumos
+      </button>
+      <button onclick="mudarAba('medicamento')" id="tab-btn-medicamento" class="pb-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+        <span>💉</span> Medicamentos & Vacinas
+      </button>
+      <button onclick="mudarAba('fechamento')" id="tab-btn-fechamento" class="pb-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+        <span>⚖️</span> Venda, Abate & Lucro
+      </button>
+      <button onclick="mudarAba('animais')" id="tab-btn-animais" class="pb-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+        <span>📋</span> Pesagem dos Animais
+      </button>
+      <button onclick="mudarAba('relatorios')" id="tab-btn-relatorios" class="pb-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+        <span>📊</span> Relatórios Detalhados
+      </button>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- ABA 1: RAÇÃO E INSUMOS -->
+    <!-- ============================================================== -->
+    <div id="aba-racao" class="space-y-6">
+      
+      <!-- Formulário de lançamento rápido -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <h3 class="font-bold text-base text-slate-900 flex items-center gap-2 mb-3">
+          <span>+</span> Novo Lançamento de Ração / Volumoso
+        </h3>
+        
+        <form onsubmit="adicionarDespesa(event, 'racao')" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Data</label>
+            <input type="date" id="racao-data" required class="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Descrição do Insumo</label>
+            <input type="text" id="racao-desc" placeholder="Ex: Ração, Silagem, Milho moído, Palma" required class="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Quantidade</label>
+            <input type="number" step="0.01" id="racao-qtd" value="1" required class="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none text-right">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Unidade</label>
+            <input type="text" id="racao-un" value="Sacos 40kg" class="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none text-center">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Valor Total (R$)</label>
+            <div class="flex gap-2">
+              <input type="number" step="0.01" id="racao-valor" placeholder="0.00" required class="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none font-bold text-right text-emerald-800">
+              <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-colors shrink-0">
+                Salvar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tabela de lançamentos de ração -->
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+          <h4 class="font-bold text-sm text-slate-900">Histórico de Ração e Alimentação</h4>
+          <span id="badge-total-racao" class="text-xs font-bold px-3 py-1 bg-amber-50 text-amber-800 rounded-full border border-amber-200">
+            Total: R$ 0,00
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+              <tr>
+                <th class="p-3">Data</th>
+                <th class="p-3">Insumo</th>
+                <th class="p-3 text-center">Qtd / Unidade</th>
+                <th class="p-3 text-right">Valor Total</th>
+                <th class="p-3 text-center w-16">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-racao-body" class="divide-y divide-slate-100">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- ABA 2: MEDICAMENTOS E VACINAS -->
+    <!-- ============================================================== -->
+    <div id="aba-medicamento" class="hidden space-y-6">
+      
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <h3 class="font-bold text-base text-slate-900 flex items-center gap-2 mb-3">
+          <span>+</span> Novo Medicamento / Vacina / Vermífugo
+        </h3>
+        
+        <form onsubmit="adicionarDespesa(event, 'medicamento')" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Data</label>
+            <input type="date" id="med-data" required class="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nome do Produto</label>
+            <input type="text" id="med-desc" placeholder="Ex: Vermífugo, Vacina Clostridiose, Vitaminas" required class="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Doses / Qtd</label>
+            <input type="text" id="med-un" value="1 frasco" class="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none text-center">
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Valor Total Pago (R$)</label>
+            <div class="flex gap-2">
+              <input type="number" step="0.01" id="med-valor" placeholder="0.00" required class="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none font-bold text-right text-blue-800">
+              <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-colors shrink-0">
+                Salvar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+          <h4 class="font-bold text-sm text-slate-900">Protocolo Sanitário & Remédios Aplicados</h4>
+          <span id="badge-total-med" class="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-800 rounded-full border border-blue-200">
+            Total: R$ 0,00
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+              <tr>
+                <th class="p-3">Data</th>
+                <th class="p-3">Medicamento / Vacina</th>
+                <th class="p-3 text-center">Doses / Frascos</th>
+                <th class="p-3 text-right">Valor Total</th>
+                <th class="p-3 text-center w-16">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-med-body" class="divide-y divide-slate-100">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- ABA 3: FECHAMENTO, VENDA E LUCRO -->
+    <!-- ============================================================== -->
+    <div id="aba-fechamento" class="hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- PARÂMETROS DA VENDA NO ABATE -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <h3 class="font-bold text-base text-slate-900 flex items-center gap-2 pb-2 border-b border-slate-100">
+            <span>⚖️</span> Simulação e Venda do Lote
+          </h3>
+
+          <div class="space-y-3 text-xs">
+            
+            <!-- ESCOLHA DA QUANTIDADE DE ANIMAIS A VENDER -->
+            <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200 space-y-1.5 shadow-sm">
+              <div class="flex justify-between items-center">
+                <label class="block font-bold text-slate-800 text-xs">Qtd de Animais a Vender:</label>
+                <span id="txt-qtd-total-lote" class="text-[11px] text-emerald-800 font-bold">Total no Lote: 6 animais</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="number" id="fechamento-qtd-venda" min="1" max="999" value="6" oninput="atualizarCalculoFechamento()" class="w-24 p-2 rounded-lg border border-slate-300 font-black text-center text-slate-900 text-base bg-white focus:ring-2 focus:ring-emerald-500 shadow-sm">
+                <span class="text-xs text-slate-600 font-medium">cabeças para venda</span>
+                <button type="button" onclick="venderTodosAnimais()" class="ml-auto text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+                  Vender Todos
+                </button>
+              </div>
+              <div id="txt-animais-restantes" class="text-[11px] text-slate-600 font-medium">
+                Vendendo 6 de 6 animais (Venda Total do Lote)
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Como você vende os animais?</label>
+              <select id="fechamento-modo-venda" onchange="alterarModoVendaFrontend()" class="w-full p-2.5 rounded-lg border border-slate-300 text-slate-800 font-bold bg-slate-50">
+                <option value="cabeca">Preço Fechado por Cabeça / Animal (R$ / animal)</option>
+                <option value="arroba">Por Arroba (@) de Carcaça (Típico para Gado Bovino)</option>
+                <option value="kg_vivo">Por Kg Vivo (Muito usado em Porco, Carneiro, Bode e Frango)</option>
+                <option value="kg_carcaca">Por Kg de Carcaça Limpa (R$ / kg)</option>
+              </select>
+            </div>
+
+            <!-- MODO 1: CABEÇA -->
+            <div id="box-venda-cabeca">
+              <label class="block font-semibold text-slate-600 mb-1">Valor de Venda por Cabeça (R$)</label>
+              <input type="number" id="fechamento-venda-cabeca" oninput="atualizarCalculoFechamento()" class="w-full p-2.5 rounded-lg border border-slate-300 font-bold text-slate-900 text-right text-sm">
+            </div>
+
+            <!-- MODO 2: ARROBA -->
+            <div id="box-venda-arroba" class="hidden space-y-3">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block font-semibold text-slate-600 mb-1">Peso Vivo Médio (kg)</label>
+                  <input type="number" id="fechamento-peso-vivo" oninput="atualizarCalculoFechamento()" class="w-full p-2 rounded-lg border border-slate-300 text-right font-medium">
+                </div>
+                <div>
+                  <label class="block font-semibold text-slate-600 mb-1">Preço da @ (R$)</label>
+                  <input type="number" id="fechamento-preco-arroba" oninput="atualizarCalculoFechamento()" class="w-full p-2 rounded-lg border border-slate-300 text-right font-medium">
+                </div>
+              </div>
+              <p id="txt-fechamento-arrobas" class="text-slate-500 text-[11px]">Rendimento 54%: 18.36 @ por cabeça (R$ 4.498,20)</p>
+            </div>
+
+            <!-- MODO 3: KG VIVO -->
+            <div id="box-venda-kg-vivo" class="hidden space-y-3">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block font-semibold text-slate-600 mb-1">Peso Vivo Médio (kg)</label>
+                  <input type="number" id="fechamento-peso-vivo-kg" oninput="atualizarCalculoFechamento()" class="w-full p-2 rounded-lg border border-slate-300 text-right font-bold text-slate-800">
+                </div>
+                <div>
+                  <label class="block font-semibold text-slate-600 mb-1">Preço do Kg Vivo (R$ / kg)</label>
+                  <input type="number" step="0.10" id="fechamento-preco-kg-vivo" oninput="atualizarCalculoFechamento()" class="w-full p-2 rounded-lg border border-slate-300 text-right font-bold text-emerald-800">
+                </div>
+              </div>
+              <p id="txt-fechamento-kg-vivo" class="text-slate-500 text-[11px]">Valor estimado por animal: R$ 0,00</p>
+            </div>
+
+            <!-- MODO 4: KG CARCAÇA -->
+            <div id="box-venda-kg-carcaca" class="hidden space-y-3">
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="block font-semibold text-slate-600 mb-1">Peso Vivo (kg)</label>
+                  <input type="number" id="fechamento-peso-carcaca-vivo" oninput="atualizarCalculoFechamento()" class="w-full p-2 rounded-lg border border-slate-300 text-right">
+                </div>
+                <div>
+                  <label class="block font-semibold text-slate-600 mb-1">Rendimento %</label>
+                  <input type="number" id="fechamento-rendimento-pct" oninput="atualizarCalculoFechamento()" class="w-full p-2 rounded-lg border border-slate-300 text-center font-bold">
+                </div>
+                <div>
+                  <label class="block font-semibold text-slate-600 mb-1">Preço/Kg Carcaça</label>
+                  <input type="number" step="0.50" id="fechamento-preco-kg-carcaca" oninput="atualizarCalculoFechamento()" class="w-full p-2 rounded-lg border border-slate-300 text-right font-bold text-emerald-800">
+                </div>
+              </div>
+              <p id="txt-fechamento-carcaca" class="text-slate-500 text-[11px]">Peso limpo estimado: 0 kg (R$ 0,00 / animal)</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Frete para o Abate / Frigorífico (R$)</label>
+              <input type="number" id="fechamento-frete-abate" oninput="atualizarCalculoFechamento()" class="w-full p-2 rounded-lg border border-slate-300 text-right font-medium">
+            </div>
+
+            <button onclick="salvarFechamentoLote()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 rounded-xl transition-colors text-sm shadow-sm flex items-center justify-center gap-2">
+              <span>💾</span> Confirmar e Salvar Fechamento Oficial
+            </button>
+          </div>
+        </div>
+
+        <!-- DEMONSTRATIVO DE RESULTADOS (DRE) -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <h3 class="font-bold text-base text-slate-900 flex items-center gap-2 pb-2 border-b border-slate-100">
+            <span>📑</span> Demonstrativo Financeiro Completo (DRE)
+          </h3>
+
+          <div class="space-y-2.5 text-xs">
+            <div class="flex justify-between py-1.5 border-b border-slate-100">
+              <span class="font-semibold text-slate-700">(+) RECEITA DA VENDA (<span id="dre-qtd-vendida">6</span> animais):</span>
+              <span id="dre-receita" class="font-bold text-blue-600 text-sm">R$ 0,00</span>
+            </div>
+
+            <div class="flex justify-between py-1 border-b border-slate-100">
+              <span class="text-slate-500">(-) Compra dos <span id="dre-qtd-compra">6</span> Animais Vendidos:</span>
+              <span id="dre-compra" class="font-medium text-rose-600">- R$ 0,00</span>
+            </div>
+
+            <div class="flex justify-between py-1 border-b border-slate-100">
+              <span class="text-slate-500">(-) Frete de Entrada Proporcional:</span>
+              <span id="dre-frete-entrada" class="font-medium text-rose-600">- R$ 0,00</span>
+            </div>
+
+            <div class="flex justify-between py-1 border-b border-slate-100">
+              <span class="text-slate-500">(-) Ração Proporcional aos Vendidos:</span>
+              <span id="dre-racao" class="font-medium text-rose-600">- R$ 0,00</span>
+            </div>
+
+            <div class="flex justify-between py-1 border-b border-slate-100">
+              <span class="text-slate-500">(-) Medicamentos Proporcionais:</span>
+              <span id="dre-med" class="font-medium text-rose-600">- R$ 0,00</span>
+            </div>
+
+            <div class="flex justify-between py-1 border-b border-slate-100">
+              <span class="text-slate-500">(-) Frete Abate e Outros:</span>
+              <span id="dre-frete-abate" class="font-medium text-rose-600">- R$ 0,00</span>
+            </div>
+
+            <div class="flex justify-between py-2 border-t-2 border-slate-200 bg-slate-50 px-3 rounded-lg font-bold">
+              <span class="text-slate-700">(=) CUSTO TOTAL DOS <span id="dre-qtd-custo">6</span> ANIMAIS:</span>
+              <span id="dre-custo-total" class="text-rose-700 font-bold text-sm">R$ 0,00</span>
+            </div>
+
+            <!-- RESULTADO FINAL -->
+            <div class="flex justify-between py-3 px-4 rounded-xl bg-emerald-50 border border-emerald-200 items-center">
+              <div>
+                <div class="text-xs font-bold text-emerald-800 uppercase">(=) LUCRO LÍQUIDO DOS <span id="dre-qtd-lucro">6</span> ANIMAIS</div>
+                <div class="text-[11px] text-emerald-700">Lucro por animal vendido: <strong id="dre-lucro-cabeca" class="text-emerald-900">R$ 0,00</strong></div>
+              </div>
+              <div id="dre-lucro-final" class="text-xl sm:text-2xl font-black text-emerald-700">
+                R$ 0,00
+              </div>
+            </div>
+
+            <!-- RESUMO DE ANIMAIS RESTANTES (CASO VENDA PARCIAL) -->
+            <div id="box-saldo-restante" class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] hidden">
+              <strong>📦 Saldo Restante no Lote:</strong> <span id="txt-saldo-restante">Sobram 4 animais ainda no lote.</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-center pt-2">
+              <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">Preço de Equilíbrio</span>
+                <span id="dre-break-even" class="font-bold text-slate-800">R$ 0,00 / cab</span>
+              </div>
+              <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">Margem Líquida</span>
+                <span id="dre-margem" class="font-bold text-slate-800">0.0%</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- ABA 4: PESAGEM DOS ANIMAIS -->
+    <!-- ============================================================== -->
+    <div id="aba-animais" class="hidden space-y-6">
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h3 class="font-bold text-base text-slate-900">Acompanhamento Individual de Peso</h3>
+            <p class="text-xs text-slate-500">Ganho de peso (kg) e Ganho Médio Diário (GMD) durante o confinamento/engorda.</p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+              <tr>
+                <th class="p-3">Brinco / ID</th>
+                <th class="p-3">Raça / Tipo</th>
+                <th class="p-3 text-center">Peso Entrada (kg)</th>
+                <th class="p-3 text-center">Peso Abate (kg)</th>
+                <th class="p-3 text-center">Ganho Peso (kg)</th>
+                <th class="p-3 text-center">GMD (kg/dia)</th>
+                <th class="p-3">Observação</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-animais-body" class="divide-y divide-slate-100">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- ABA 5: CENTRAL DE RELATÓRIOS DETALHADOS -->
+    <!-- ============================================================== -->
+    <div id="aba-relatorios" class="hidden space-y-6">
+
+      <!-- CABEÇALHO DO RELATÓRIO COM AÇÕES E IMPRESSÃO -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">📊</span>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-900">Relatórios Gerenciais e Contábeis do Lote</h3>
+          </div>
+          <p id="relatorio-lote-info" class="text-xs sm:text-sm text-slate-500 mt-1">
+            Selecione a categoria de relatório abaixo para analisar os custos discriminados, vendas e lucro.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-colors">
+            <span>🖨️</span> Imprimir / Salvar PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- FILTROS PRINCIPAIS: ESCOLHA DE LOTE, ANIMAL ESPECÍFICO E MODALIDADE DE DIAS -->
+      <!-- ============================================================== -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 1. ESCOLHA DO LOTE -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <span>🏷️</span> Escolha o Lote para o Relatório:
+            </label>
+            <select id="rel-filtro-lote" onchange="trocarLoteRelatorio(this.value)" class="w-full text-xs font-semibold rounded-xl border border-slate-300 p-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <!-- Preenchido via JavaScript -->
+            </select>
+          </div>
+
+          <!-- 2. ESCOLHA DO ANIMAL ESPECÍFICO (Vendido ou do Lote) -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <span>🐾</span> Escolha o Animal Específico:
+            </label>
+            <select id="rel-filtro-animal" onchange="trocarAnimalRelatorio(this.value)" class="w-full text-xs font-semibold rounded-xl border border-slate-300 p-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="todos">🐾 Todos os Animais (Visão Geral do Lote)</option>
+              <!-- Preenchido via JavaScript -->
+            </select>
+          </div>
+        </div>
+
+        <!-- 3. MODALIDADE DE CONTAGEM DE DIAS (Dias Corridos vs Dias Fixos: 30, 60, 90, 120) -->
+        <div class="pt-3 border-t border-slate-100">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div>
+              <span class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                <span>⏱️</span> Modalidade de Cálculo dos Dias:
+              </span>
+              <p class="text-[11px] text-slate-500">
+                Alterne entre contagem por dia corrido (tempo real que o lote já está rodando) ou por período fixo (30, 60, 90 ou 120 dias).
+              </p>
+            </div>
+
+            <!-- Botões de Alternância de Modalidade -->
+            <div class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200 text-xs font-bold shrink-0">
+              <button type="button" onclick="alterarModalidadeDias('corridos')" id="btn-modalidade-corridos" class="px-3 py-1.5 rounded-lg bg-white text-emerald-800 shadow-sm transition-all flex items-center gap-1.5">
+                <span>📅</span> Dia Corrido (Rodando)
+              </button>
+              <button type="button" onclick="alterarModalidadeDias('fixo')" id="btn-modalidade-fixo" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+                <span>⏱️</span> Dias Fixos (30, 60, 90, 120)
+              </button>
+            </div>
+          </div>
+
+          <!-- SUB-PAINEL A: DIA CORRIDO (DATA DE ENTRADA E DIAS RODANDO) -->
+          <div id="box-dias-corridos" class="mt-3 p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
+              <div>
+                <label class="block text-[11px] font-bold text-emerald-900 mb-0.5">Data de Entrada no Lote:</label>
+                <input type="date" id="rel-data-entrada-corrida" onchange="atualizarDataEntradaCorrida(this.value)" class="text-xs font-semibold p-1.5 rounded-lg border border-emerald-300 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
+              </div>
+              <div class="text-xs text-emerald-950 font-medium">
+                <span>Status temporal: <strong id="txt-data-referencia">Até Hoje</strong></span>
+              </div>
+            </div>
+            
+            <div class="sm:text-right">
+              <span class="text-[11px] font-bold text-emerald-800 uppercase block">Tempo de Confinamento / Engorda:</span>
+              <span id="badge-dias-rodando" class="text-base font-black text-emerald-900">Rodando há 30 dias</span>
+            </div>
+          </div>
+
+          <!-- SUB-PAINEL B: DIAS FIXOS (30, 60, 90, 120) -->
+          <div id="box-dias-fixos" class="mt-3 p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 hidden">
+            <div>
+              <span class="block text-[11px] font-bold text-blue-900 mb-1">Selecione o Período Fixo Desejado:</span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="selecionarDiasFixos(30)" id="btn-fixo-30" class="px-3.5 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-blue-500">30 Dias</button>
+                <button type="button" onclick="selecionarDiasFixos(60)" id="btn-fixo-60" class="px-3.5 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-blue-500">60 Dias</button>
+                <button type="button" onclick="selecionarDiasFixos(90)" id="btn-fixo-90" class="px-3.5 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-blue-500">90 Dias</button>
+                <button type="button" onclick="selecionarDiasFixos(120)" id="btn-fixo-120" class="px-3.5 py-1.5 text-xs font-bold rounded-lg border-2 border-blue-600 bg-blue-600 text-white shadow-sm">120 Dias</button>
+              </div>
+            </div>
+
+            <div class="sm:text-right">
+              <span class="text-[11px] font-bold text-blue-800 uppercase block">Ciclo Fixo Aplicado:</span>
+              <span id="badge-dias-fixos-info" class="text-base font-black text-blue-900">120 dias fixos</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- SELETOR DE CATEGORIA DE RELATÓRIO -->
+      <div class="bg-slate-100 p-1.5 rounded-2xl flex flex-wrap gap-1.5 text-xs font-bold border border-slate-200">
+        <button type="button" onclick="selecionarTipoRelatorio('vendas')" id="btn-rel-tipo-vendas" class="flex-1 min-w-[140px] py-2.5 px-3 rounded-xl bg-white text-emerald-800 shadow-sm flex items-center justify-center gap-2 transition-all">
+          <span>💰</span> Vendas, Custo de Entrada & Lucro
+        </button>
+        <button type="button" onclick="selecionarTipoRelatorio('comida')" id="btn-rel-tipo-comida" class="flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2 transition-all">
+          <span>🌾</span> Custo com Comida (Ração)
+        </button>
+        <button type="button" onclick="selecionarTipoRelatorio('medicamentos')" id="btn-rel-tipo-medicamentos" class="flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2 transition-all">
+          <span>💉</span> Custo com Medicamentos
+        </button>
+        <button type="button" onclick="selecionarTipoRelatorio('consolidado')" id="btn-rel-tipo-consolidado" class="flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2 transition-all">
+          <span>📑</span> Demonstrativo Geral (DRE)
+        </button>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- PAINEL 1: VENDAS, CUSTO DE ENTRADA & LUCRO -->
+      <!-- ============================================================== -->
+      <div id="rel-painel-vendas" class="space-y-6">
+
+        <!-- CARD ESPECÍFICO DO ANIMAL SELECIONADO -->
+        <div id="rel-card-animal-especifico" class="p-5 rounded-2xl bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-800 text-white shadow-md border border-slate-700 hidden">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-white/10">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-2xl shrink-0">
+                🏷️
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 id="rel-animal-nome" class="text-lg font-black text-white">Animal: BOV-01</h4>
+                  <span id="rel-animal-status-badge" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-500 text-emerald-950">Vendido</span>
+                </div>
+                <p id="rel-animal-detalhes" class="text-xs text-slate-300 mt-0.5">Raça: Nelore • Observação: Ótima conformação</p>
+              </div>
+            </div>
+
+            <!-- Dados de Peso e GMD -->
+            <div class="grid grid-cols-3 gap-3 text-center bg-white/5 p-2 rounded-xl border border-white/10 shrink-0">
+              <div>
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">Peso Entrada</span>
+                <span id="rel-animal-peso-entrada" class="text-xs font-bold text-white">360 kg</span>
+              </div>
+              <div>
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">Peso Abate</span>
+                <span id="rel-animal-peso-abate" class="text-xs font-bold text-emerald-400">520 kg</span>
+              </div>
+              <div>
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">GMD Diário</span>
+                <span id="rel-animal-gmd" class="text-xs font-bold text-amber-300">+1.33 kg/d</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tríade Financeira do Animal Específico -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3">
+            <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+              <span class="block text-[10px] font-bold text-amber-300 uppercase">Valor de Entrada (Custo Total deste Animal)</span>
+              <div id="rel-animal-custo-total" class="text-lg font-black text-amber-200 mt-0.5">R$ 0,00</div>
+              <span id="rel-animal-custo-desc" class="text-[10px] text-slate-400">Compra + Frete + Comida + Vacinas</span>
+            </div>
+            <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+              <span class="block text-[10px] font-bold text-blue-300 uppercase">Valor de Venda (Receita do Animal)</span>
+              <div id="rel-animal-receita-total" class="text-lg font-black text-blue-200 mt-0.5">R$ 0,00</div>
+              <span id="rel-animal-receita-desc" class="text-[10px] text-slate-400">Preço alcançado na venda</span>
+            </div>
+            <div class="bg-white/10 p-3 rounded-xl border border-emerald-500/40">
+              <span class="block text-[10px] font-bold text-emerald-300 uppercase">Lucro Líquido Gerado por este Animal</span>
+              <div id="rel-animal-lucro-total" class="text-xl font-black text-emerald-300 mt-0.5">R$ 0,00</div>
+              <span id="rel-animal-lucro-desc" class="text-[10px] text-emerald-200 font-medium">Margem Líquida: 0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status de Venda -->
+        <div id="rel-vendas-status-banner" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span id="rel-vendas-status-icone" class="text-3xl">⚖️</span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span id="rel-vendas-status-tag" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-600 text-white">Vendido</span>
+                <span id="rel-vendas-status-titulo" class="font-bold text-sm text-slate-800">Lote com Venda Registrada</span>
+              </div>
+              <p id="rel-vendas-status-desc" class="text-xs text-slate-600 mt-0.5">Animais abatidos e comercializados com receita apurada.</p>
+            </div>
+          </div>
+          <div class="text-right sm:border-l sm:border-emerald-200 sm:pl-4">
+            <span class="text-[11px] text-slate-500 font-medium block">Quantidade Comercializada:</span>
+            <span id="rel-vendas-qtd-info" class="text-sm font-bold text-slate-800">6 de 6 animais vendidos</span>
+          </div>
+        </div>
+
+        <!-- Cards de Destaque -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card 1: Quantidade e Saldo -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Status dos Animais</span>
+            <div id="rel-card-animais-vendidos" class="text-2xl font-black text-slate-900 mt-1">6 Vendidos</div>
+            <div id="rel-card-animais-saldo" class="text-xs font-semibold text-slate-500 mt-1">0 animais restantes</div>
+          </div>
+
+          <!-- Card 2: Valor de Entrada / Custo Unitário -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wider block">Valor de Entrada / Custo</span>
+            <div id="rel-card-custo-entrada-cabeca" class="text-2xl font-black text-amber-800 mt-1">R$ 0,00</div>
+            <div id="rel-card-custo-entrada-total" class="text-xs font-semibold text-slate-500 mt-1">Custo total: R$ 0,00</div>
+          </div>
+
+          <!-- Card 3: Valor da Venda (Receita) -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider block">Valor de Venda (Receita)</span>
+            <div id="rel-card-venda-total" class="text-2xl font-black text-blue-800 mt-1">R$ 0,00</div>
+            <div id="rel-card-venda-cabeca" class="text-xs font-semibold text-slate-500 mt-1">R$ 0,00 / animal vendido</div>
+          </div>
+
+          <!-- Card 4: Lucro Líquido Total -->
+          <div class="bg-white border border-emerald-200 rounded-2xl p-4 shadow-sm bg-gradient-to-br from-emerald-50/50 to-white">
+            <span class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">Lucro Líquido Total</span>
+            <div id="rel-card-lucro-total" class="text-2xl font-black text-emerald-700 mt-1">R$ 0,00</div>
+            <div id="rel-card-lucro-cabeca" class="text-xs font-bold text-emerald-800 mt-1">R$ 0,00 / animal vendido</div>
+          </div>
+        </div>
+
+        <!-- Tabela Detalhada de Venda e Custo de Entrada -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <h4 class="font-bold text-base text-slate-900 mb-3 flex items-center gap-2">
+            <span>📋</span> Demonstrativo Detalhado do Custo de Entrada & Retorno por Animal
+          </h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                <tr>
+                  <th class="p-3">Componente Financeiro</th>
+                  <th class="p-3 text-right">Por Animal (Cabeça)</th>
+                  <th class="p-3 text-right">Total do Lote (<span id="rel-tb-qtd-vendida">6</span> cab)</th>
+                  <th class="p-3 text-center">% do Custo de Entrada</th>
+                  <th class="p-3">Detalhamento</th>
+                </tr>
+              </thead>
+              <tbody id="rel-tabela-vendas-body" class="divide-y divide-slate-100">
+                <!-- Preenchido via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- PAINEL 2: CUSTO COM COMIDA (RAÇÃO) -->
+      <!-- ============================================================== -->
+      <div id="rel-painel-comida" class="hidden space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wider block">Gasto Total com Comida</span>
+            <div id="rel-comida-total" class="text-2xl font-black text-amber-800 mt-1">R$ 0,00</div>
+            <div id="rel-comida-pct-custo" class="text-xs text-slate-500 mt-1">0% dos custos totais</div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Custo de Comida / Animal</span>
+            <div id="rel-comida-por-cabeca" class="text-2xl font-black text-slate-800 mt-1">R$ 0,00</div>
+            <div id="rel-comida-por-cabeca-sub" class="text-xs text-slate-500 mt-1">Para engorda completa</div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Diária Alimentar / Animal</span>
+            <div id="rel-comida-diaria" class="text-2xl font-black text-slate-800 mt-1">R$ 0,00</div>
+            <div id="rel-comida-diaria-sub" class="text-xs text-slate-500 mt-1">Custo por animal ao dia</div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Compras / Lançamentos</span>
+            <div id="rel-comida-qtd-lancamentos" class="text-2xl font-black text-slate-800 mt-1">0 registros</div>
+            <div id="rel-comida-dias-ciclo" class="text-xs text-slate-500 mt-1">Ciclo de 120 dias</div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-bold text-base text-slate-900 flex items-center gap-2">
+              <span>🌾</span> Discriminação Completa dos Gastos com Alimentação
+            </h4>
+            <span id="rel-comida-badge-resumo" class="text-xs font-semibold px-2.5 py-1 bg-amber-50 text-amber-800 rounded-lg border border-amber-200">Total: R$ 0,00</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                <tr>
+                  <th class="p-3">Data</th>
+                  <th class="p-3">Insumo / Ração / Volumoso</th>
+                  <th class="p-3 text-center">Quantidade</th>
+                  <th class="p-3 text-center">Unidade</th>
+                  <th class="p-3 text-right">Valor Unitário</th>
+                  <th class="p-3 text-right">Valor Total (R$)</th>
+                  <th class="p-3 text-right">Custo / Cabeça</th>
+                  <th class="p-3 text-center">% da Comida</th>
+                </tr>
+              </thead>
+              <tbody id="rel-tabela-comida-body" class="divide-y divide-slate-100">
+                <!-- Preenchido via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- PAINEL 3: CUSTO COM MEDICAMENTOS -->
+      <!-- ============================================================== -->
+      <div id="rel-painel-medicamentos" class="hidden space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-rose-700 uppercase tracking-wider block">Gasto Total com Remédios</span>
+            <div id="rel-med-total" class="text-2xl font-black text-rose-800 mt-1">R$ 0,00</div>
+            <div id="rel-med-pct-custo" class="text-xs text-slate-500 mt-1">0% dos custos totais</div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Custo Sanitário / Animal</span>
+            <div id="rel-med-por-cabeca" class="text-2xl font-black text-slate-800 mt-1">R$ 0,00</div>
+            <div id="rel-med-por-cabeca-sub" class="text-xs text-slate-500 mt-1">Para engorda completa</div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Protocolos Sanitários</span>
+            <div id="rel-med-qtd-lancamentos" class="text-2xl font-black text-slate-800 mt-1">0 aplicações</div>
+            <div class="text-xs text-slate-500 mt-1">Vacinas, vermífugos e vitaminas</div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Status Sanitário</span>
+            <div class="text-2xl font-black text-emerald-700 mt-1">Protegido</div>
+            <div class="text-xs text-emerald-800 mt-1">Protocolo sanitário em dia</div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-bold text-base text-slate-900 flex items-center gap-2">
+              <span>💉</span> Discriminação Completa de Medicamentos e Vacinas
+            </h4>
+            <span id="rel-med-badge-resumo" class="text-xs font-semibold px-2.5 py-1 bg-rose-50 text-rose-800 rounded-lg border border-rose-200">Total: R$ 0,00</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                <tr>
+                  <th class="p-3">Data</th>
+                  <th class="p-3">Medicamento / Vacina / Vermífugo</th>
+                  <th class="p-3 text-center">Doses / Qtd</th>
+                  <th class="p-3 text-right">Valor Total (R$)</th>
+                  <th class="p-3 text-right">Custo / Cabeça</th>
+                  <th class="p-3 text-center">% dos Remédios</th>
+                  <th class="p-3">Finalidade / Observação</th>
+                </tr>
+              </thead>
+              <tbody id="rel-tabela-med-body" class="divide-y divide-slate-100">
+                <!-- Preenchido via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- PAINEL 4: DEMONSTRATIVO GERAL CONSOLIDADO (DRE) -->
+      <!-- ============================================================== -->
+      <div id="rel-painel-consolidado" class="hidden space-y-6">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <h4 class="font-bold text-base text-slate-900 mb-3 flex items-center gap-2">
+            <span>📑</span> Demonstrativo Financeiro Completo (DRE Executivo)
+          </h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                <tr>
+                  <th class="p-3">Linha Contábil / Demonstrativo</th>
+                  <th class="p-3 text-right">Valor Total do Lote (R$)</th>
+                  <th class="p-3 text-right">Valor por Animal (Cabeça)</th>
+                  <th class="p-3 text-center">% sobre a Receita</th>
+                  <th class="p-3">Classificação Gerencial</th>
+                </tr>
+              </thead>
+              <tbody id="rel-tabela-consolidado-body" class="divide-y divide-slate-100">
+                <!-- Preenchido via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  <!-- MODAL: NOVO LOTE (COM PRESETS DO NORDESTE) -->
+  <div id="modal-novo-lote" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-lg text-slate-900">Cadastrar Novo Lote de Animais</h3>
+          <p class="text-xs text-slate-500">Escolha o animal para carregar os parâmetros sugeridos automaticamente.</p>
+        </div>
+        <button onclick="fecharModalNovoLote()" class="text-slate-400 hover:text-slate-700 font-bold text-lg">✕</button>
+      </div>
+
+      <!-- BOTÕES DE SELEÇÃO RÁPIDA DE ANIMAIS TÍPICOS -->
+      <div>
+        <label class="block font-semibold text-slate-700 mb-2 text-xs">Selecione o Animal de Abate:</label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          
+          <button type="button" onclick="aplicarPresetAnimal('bovino')" id="btn-preset-bovino" class="p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-left transition-all">
+            <div class="text-xl">🐂</div>
+            <div class="font-bold text-xs text-slate-800 mt-1">Bovino / Gado</div>
+            <div class="text-[10px] text-slate-500">Nelore, Guzerá, Sindi</div>
+          </button>
+
+          <button type="button" onclick="aplicarPresetAnimal('suino')" id="btn-preset-suino" class="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 text-left transition-all">
+            <div class="text-xl">🐖</div>
+            <div class="font-bold text-xs text-slate-800 mt-1">Suíno / Porco</div>
+            <div class="text-[10px] text-slate-500">Caipira, Moura, Piau</div>
+          </button>
+
+          <button type="button" onclick="aplicarPresetAnimal('ovino')" id="btn-preset-ovino" class="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 text-left transition-all">
+            <div class="text-xl">🐑</div>
+            <div class="font-bold text-xs text-slate-800 mt-1">Ovino / Carneiro</div>
+            <div class="text-[10px] text-slate-500">Santa Inês, Dorper</div>
+          </button>
+
+          <button type="button" onclick="aplicarPresetAnimal('caprino')" id="btn-preset-caprino" class="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 text-left transition-all">
+            <div class="text-xl">🐐</div>
+            <div class="font-bold text-xs text-slate-800 mt-1">Caprino / Bode</div>
+            <div class="text-[10px] text-slate-500">Moxotó, Boer, SRD</div>
+          </button>
+
+          <button type="button" onclick="aplicarPresetAnimal('avicola')" id="btn-preset-avicola" class="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 text-left transition-all">
+            <div class="text-xl">🐓</div>
+            <div class="font-bold text-xs text-slate-800 mt-1">Aves / Frango</div>
+            <div class="text-[10px] text-slate-500">Caipira e Capoeira</div>
+          </button>
+
+          <button type="button" onclick="aplicarPresetAnimal('outro')" id="btn-preset-outro" class="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 text-left transition-all">
+            <div class="text-xl">🐾</div>
+            <div class="font-bold text-xs text-slate-800 mt-1">Outro Animal</div>
+            <div class="text-[10px] text-slate-500">Personalizado</div>
+          </button>
+
+        </div>
+      </div>
+
+      <form onsubmit="salvarNovoLote(event)" class="space-y-3 text-xs pt-2 border-t border-slate-100">
+        
+        <input type="hidden" id="novo-lote-categoria" value="bovino">
+        <input type="hidden" id="novo-lote-icone" value="🐂">
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nome de Identificação do Lote</label>
+          <input type="text" id="novo-lote-nome" value="Lote 01 - Garrotes Nelore" required class="w-full p-2.5 rounded-lg border border-slate-300 font-medium">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Raça / Categoria</label>
+            <input type="text" id="novo-lote-raca" value="Nelore / Sertanejo" class="w-full p-2.5 rounded-lg border border-slate-300">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Qtd de Animais (Cabeças)</label>
+            <input type="number" id="novo-lote-qtd" value="6" min="1" required class="w-full p-2.5 rounded-lg border border-slate-300 font-bold text-center">
+          </div>
+        </div>
+
+        <!-- CONTROLE DE DURAÇÃO E MODALIDADE DE DIAS -->
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+          <input type="hidden" id="novo-lote-modalidade" value="corrido">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Data de Entrada dos Animais</label>
+              <input type="date" id="novo-lote-data" required onchange="atualizarDiasModalNovoLote()" class="w-full p-2.5 rounded-lg border border-slate-300 font-medium bg-white">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Como calcular a duração?</label>
+              <div class="grid grid-cols-2 gap-1.5 text-xs font-bold pt-0.5">
+                <button type="button" onclick="definirModalidadeNovoLote('corrido')" id="btn-modal-tipo-corrido" class="py-2 px-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 text-emerald-900 flex items-center justify-center gap-1 transition-all">
+                  <span>📅</span> Dia Corrido
+                </button>
+                <button type="button" onclick="definirModalidadeNovoLote('fixo')" id="btn-modal-tipo-fixo" class="py-2 px-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-slate-300 flex items-center justify-center gap-1 transition-all">
+                  <span>⏱️</span> Dias Fixos
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODO CORRIDO: ACOMPANHAMENTO PELO DIA REAL RODANDO -->
+          <div id="novo-lote-box-corrido" class="p-2.5 bg-emerald-100/70 border border-emerald-300/80 rounded-lg text-emerald-950 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold">Tempo rodando até hoje:</span>
+              <span id="novo-lote-dias-rodando-txt" class="font-black text-emerald-900">1 dia (início hoje)</span>
+            </div>
+            <p class="text-[11px] text-emerald-800 mt-1">
+              O lote funcionará em modo de dias corridos em tempo real. O sistema conta os dias dia após dia, sem limite obrigatório de 120 dias.
+            </p>
+          </div>
+
+          <!-- MODO FIXO: DIGITAR QUANTIDADE DE DIAS OU ESCOLHER 30, 60, 90, 120 -->
+          <div id="novo-lote-box-fixo" class="space-y-2 hidden">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="block font-semibold text-slate-700 text-xs">Cadastrar Quantidade Específica de Dias:</label>
+                <span id="novo-lote-prev-abate-txt" class="text-[11px] text-slate-500 font-medium">Previsão: -</span>
+              </div>
+              <div class="flex gap-2 items-center">
+                <input type="number" id="novo-lote-dias" value="120" min="1" oninput="aoMudarDiasFixosModal(this.value)" class="w-24 p-2 rounded-lg border border-slate-300 font-bold text-center bg-white">
+                <span class="text-xs text-slate-600 font-semibold">dias</span>
+                
+                <!-- Botões de atalho rápido -->
+                <div class="flex gap-1 ml-auto">
+                  <button type="button" onclick="setDiasFixosModal(30)" class="px-2.5 py-1 text-[11px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-100">30d</button>
+                  <button type="button" onclick="setDiasFixosModal(60)" class="px-2.5 py-1 text-[11px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-100">60d</button>
+                  <button type="button" onclick="setDiasFixosModal(90)" class="px-2.5 py-1 text-[11px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-100">90d</button>
+                  <button type="button" onclick="setDiasFixosModal(120)" class="px-2.5 py-1 text-[11px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-100">120d</button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 text-xs mb-1">Ou Cadastrar a Data Específica de Término / Abate:</label>
+              <input type="date" id="novo-lote-data-fim" onchange="aoMudarDataFimModal(this.value)" class="w-full p-2 rounded-lg border border-slate-300 text-xs font-semibold bg-white">
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Valor Compra / Cabeça (R$)</label>
+            <input type="number" step="0.01" id="novo-lote-compra" value="2600.00" required class="w-full p-2.5 rounded-lg border border-slate-300 font-bold text-right text-emerald-800">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Frete de Chegada (R$)</label>
+            <input type="number" step="0.01" id="novo-lote-frete" value="500.00" class="w-full p-2.5 rounded-lg border border-slate-300 font-medium text-right">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Modo de Venda Padrão</label>
+            <select id="novo-lote-modo-venda" class="w-full p-2.5 rounded-lg border border-slate-300 font-medium bg-slate-50">
+              <option value="cabeca">Preço Fechado por Cabeça</option>
+              <option value="arroba">Por Arroba (@) de Carcaça</option>
+              <option value="kg_vivo">Por Kg Vivo</option>
+              <option value="kg_carcaca">Por Kg de Carcaça</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Peso Vivo Estimado no Abate (kg)</label>
+            <input type="number" id="novo-lote-peso-abate" value="510" class="w-full p-2.5 rounded-lg border border-slate-300 font-bold text-center">
+          </div>
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="fecharModalNovoLote()" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm flex items-center gap-1.5">
+            <span>✓</span> Criar Lote
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL DE AUTENTICAÇÃO (LOGIN E CADASTRO)   -->
+  <!-- ========================================== -->
+  <div id="modal-auth" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden transform transition-all my-8 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Cabeçalho do Modal -->
+      <div class="bg-gradient-to-br from-emerald-800 to-teal-900 p-6 text-white relative">
+        <button type="button" onclick="fecharModalAuth()" class="absolute top-4 right-4 text-emerald-200 hover:text-white bg-emerald-950/40 hover:bg-emerald-950/70 w-8 h-8 rounded-full flex items-center justify-center transition-colors text-lg font-bold">
+          ✕
+        </button>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/30 border border-emerald-400/40 flex items-center justify-center text-2xl shadow-inner">
+            🌱
+          </div>
+          <div>
+            <h3 id="auth-modal-titulo" class="text-xl font-bold">Minha Conta AgroLote</h3>
+            <p id="auth-modal-subtitulo" class="text-xs text-emerald-200 mt-0.5">Sua planilha online exclusiva de animais e custos</p>
+          </div>
+        </div>
+
+        <!-- Seletor de Abas -->
+        <div class="flex bg-emerald-950/50 p-1 rounded-xl mt-5 border border-emerald-700/50 text-xs font-semibold">
+          <button type="button" id="tab-btn-login" onclick="alternarAbaAuth('login')" class="flex-1 py-2 text-center rounded-lg bg-white text-slate-900 shadow-sm transition-all">
+            Já tenho conta (Entrar)
+          </button>
+          <button type="button" id="tab-btn-cadastro" onclick="alternarAbaAuth('cadastro')" class="flex-1 py-2 text-center rounded-lg text-emerald-200 hover:text-white transition-all">
+            Criar Nova Conta Grátis
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <!-- Caixa de Alerta / Mensagem -->
+        <div id="auth-mensagem" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border"></div>
+
+        <!-- FORMULÁRIO 1: LOGIN -->
+        <form id="form-login" onsubmit="submeterLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">E-mail Cadastrado</label>
+            <input type="email" id="login-email" required placeholder="seuemail@exemplo.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50">
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Senha de Acesso</label>
+            </div>
+            <input type="password" id="login-senha" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50">
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" id="btn-submit-login" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
+              <span>Entrar na Minha Planilha</span> →
+            </button>
+          </div>
+
+          <div class="text-center pt-2">
+            <p class="text-xs text-slate-500">
+              Não tem uma conta ainda? 
+              <button type="button" onclick="alternarAbaAuth('cadastro')" class="text-emerald-700 font-bold hover:underline">
+                Cadastre-se grátis
+              </button>
+            </p>
+          </div>
+        </form>
+
+        <!-- FORMULÁRIO 2: CADASTRO -->
+        <form id="form-cadastro" onsubmit="submeterCadastro(event)" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Seu Nome ou Nome da Fazenda/Sítio</label>
+            <input type="text" id="cadastro-nome" required placeholder="Ex: Lucas / Fazenda Vale Verde" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Seu Melhor E-mail</label>
+            <input type="email" id="cadastro-email" required placeholder="seuemail@exemplo.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Crie uma Senha</label>
+            <input type="password" id="cadastro-senha" minlength="4" required placeholder="Mínimo 4 caracteres" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Qual animal você cria principalmente?</label>
+            <select id="cadastro-animal" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50">
+              <option value="bovino">🐂 Bovinos (Gado de Corte - Nelore / Sertanejo)</option>
+              <option value="suino">🐖 Suínos (Porcos Caipiras / Moura)</option>
+              <option value="ovino">🐑 Ovinos (Carneiros / Cordeiros Santa Inês)</option>
+              <option value="caprino">🐐 Caprinos (Bodes / Cabritos Moxotó)</option>
+              <option value="avicola">🐓 Aves (Frangos Caipiras de Engorda)</option>
+            </select>
+            <p class="text-[11px] text-slate-500 mt-1">Sua conta já iniciará com uma planilha configurada para este animal!</p>
+          </div>
+
+          <!-- CAMPO OBRIGATÓRIO: CÓDIGO DE CONVITE -->
+          <div class="bg-amber-50/90 p-3.5 rounded-2xl border-2 border-amber-300 shadow-sm">
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider">
+                🔑 Código de Convite / Autorização *
+              </label>
+              <span class="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full border border-amber-300">
+                Obrigatório
+              </span>
+            </div>
+            <input type="text" id="cadastro-codigo" required placeholder="Ex: ABCD-0000 (Exemplo fictício)" class="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 text-sm font-bold tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900 placeholder-slate-400">
+            <p class="text-[11px] text-amber-800 mt-1 leading-snug">
+              O código acima é apenas um exemplo fictício e não funciona. Solicite seu código de acesso real com o proprietário do sistema para liberar sua conta.
+            </p>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" id="btn-submit-cadastro" class="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
+              <span>⭐ Criar Minha Conta com Código</span>
+            </button>
+          </div>
+
+          <div class="text-center pt-2">
+            <p class="text-xs text-slate-500">
+              Já possui cadastro? 
+              <button type="button" onclick="alternarAbaAuth('login')" class="text-emerald-700 font-bold hover:underline">
+                Faça login aqui
+              </button>
+            </p>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL GERENCIADOR DE CÓDIGOS DE CONVITE    -->
+  <!-- ========================================== -->
+  <div id="modal-convites" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden transform transition-all my-8 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Cabeçalho -->
+      <div class="bg-gradient-to-br from-amber-600 to-amber-800 p-6 text-white relative">
+        <button type="button" onclick="fecharModalConvites()" class="absolute top-4 right-4 text-amber-200 hover:text-white bg-amber-950/40 hover:bg-amber-950/70 w-8 h-8 rounded-full flex items-center justify-center transition-colors text-lg font-bold">
+          ✕
+        </button>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-amber-400/30 border border-amber-300/40 flex items-center justify-center text-2xl shadow-inner">
+            🔑
+          </div>
+          <div>
+            <h3 class="text-xl font-bold">Gerenciador de Convites</h3>
+            <p class="text-xs text-amber-100 mt-0.5">Envie códigos para permitir que novos produtores se cadastrem</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Criar Novo Código -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span>➕</span> Gerar Novo Código para Enviar a um Cliente
+          </h4>
+          <form onsubmit="submeterNovoConvite(event)" class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Código de Acesso</label>
+                <input type="text" id="novo-convite-codigo" required placeholder="Ex: FAZENDA-BOA" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold uppercase tracking-wider bg-white">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Limite de Cadastros</label>
+                <input type="number" id="novo-convite-max" value="50" min="1" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold text-center bg-white">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Identificação / Para quem é?</label>
+              <input type="text" id="novo-convite-desc" placeholder="Ex: Amigo produtor de Santa Inês" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white">
+            </div>
+            <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5">
+              <span>✓</span> Gerar Código e Disponibilizar
+            </button>
+          </form>
+        </div>
+
+        <!-- Lista de Códigos Ativos -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Códigos de Acesso Ativos no Sistema
+            </h4>
+            <span id="convites-total-badge" class="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+              Carregando...
+            </span>
+          </div>
+
+          <div id="lista-convites-container" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 flex justify-end">
+          <button type="button" onclick="fecharModalConvites()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+            Fechar
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
