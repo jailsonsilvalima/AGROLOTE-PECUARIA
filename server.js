@@ -457,6 +457,18 @@ function bloquearEscritaVisitante(req, res, next) {
   next();
 }
 
+// Middleware para exigir nível de Administrador (Dono do Sistema)
+function exigirAdmin(req, res, next) {
+  if (req.isVisitante || !req.usuario || req.usuario.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: "Acesso Restrito: Apenas o Administrador do sistema tem permissão para visualizar e gerar códigos de convite."
+    });
+  }
+  next();
+}
+
+
 // Função de cálculo financeiro completo do lote
 function calcularIndicadoresLote(lote) {
   const qtdAnimais = Number(lote.qtdAnimais) || 1;
@@ -643,11 +655,14 @@ app.post('/api/auth/cadastro', (req, res) => {
     return res.status(400).json({ success: false, message: 'Já existe uma conta cadastrada com este e-mail. Faça login.' });
   }
 
+  const ehAdmin = convite.isAdmin === true;
+
   const novoUsuario = {
     id: `usr-${Date.now()}`,
     nome: String(nome).trim(),
     email: emailNorm,
     senhaHash: hashSenha(String(senha)),
+    role: ehAdmin ? 'admin' : 'produtor',
     codigoConviteUtilizado: codigoInformado,
     criadoEm: new Date().toISOString()
   };
@@ -675,12 +690,13 @@ app.post('/api/auth/cadastro', (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: 'Conta criada e autorizada com sucesso!',
+    message: ehAdmin ? 'Conta de Administrador criada com sucesso! Você tem acesso total à gestão de convites.' : 'Conta criada e autorizada com sucesso!',
     token,
     usuario: {
       id: novoUsuario.id,
       nome: novoUsuario.nome,
-      email: novoUsuario.email
+      email: novoUsuario.email,
+      role: novoUsuario.role
     }
   });
 });
@@ -712,7 +728,8 @@ app.post('/api/auth/login', (req, res) => {
     usuario: {
       id: usuario.id,
       nome: usuario.nome,
-      email: usuario.email
+      email: usuario.email,
+      role: usuario.role || 'produtor'
     }
   });
 });
@@ -727,7 +744,8 @@ app.get('/api/auth/me', autenticarUsuario, (req, res) => {
     usuario: {
       id: req.usuario.id,
       nome: req.usuario.nome,
-      email: req.usuario.email
+      email: req.usuario.email,
+      role: req.usuario.role || 'produtor'
     }
   });
 });
@@ -750,13 +768,14 @@ app.post('/api/auth/logout', (req, res) => {
 // ROTAS DE CÓDIGOS DE CONVITE (GERENCIAMENTO)
 // ==========================================
 
-// Listar códigos de convite disponíveis e estatísticas
-app.get('/api/convites', (req, res) => {
+// Listar códigos de convite disponíveis e estatísticas (SOMENTE ADMINISTRADOR)
+app.get('/api/convites', autenticarUsuario, exigirAdmin, (req, res) => {
   const db = readDb();
   const lista = (db.codigosConvite || []).map(c => ({
     codigo: c.codigo,
     descricao: c.descricao,
     ativo: c.ativo !== false,
+    isAdmin: !!c.isAdmin,
     maxUsos: c.maxUsos || 999,
     totalUsos: (c.usadoPor || []).length,
     vagasRestantes: Math.max(0, (c.maxUsos || 999) - (c.usadoPor || []).length),
@@ -765,8 +784,8 @@ app.get('/api/convites', (req, res) => {
   res.json({ success: true, convites: lista });
 });
 
-// Criar novo código de convite para enviar a um cliente
-app.post('/api/convites', (req, res) => {
+// Criar novo código de convite para enviar a um cliente (SOMENTE ADMINISTRADOR)
+app.post('/api/convites', autenticarUsuario, exigirAdmin, (req, res) => {
   const db = readDb();
   const { codigo, descricao, maxUsos } = req.body;
 
@@ -784,6 +803,7 @@ app.post('/api/convites', (req, res) => {
     codigo: codNorm,
     descricao: descricao || 'Código gerado pelo administrador',
     maxUsos: Number(maxUsos) || 50,
+    isAdmin: false, // Novos códigos criados para clientes são sempre produtores normais
     usadoPor: [],
     ativo: true,
     criadoEm: new Date().toISOString()
@@ -799,6 +819,7 @@ app.post('/api/convites', (req, res) => {
     convite: novoConvite
   });
 });
+
 
 // ==========================================
 // ROTAS DE LOTES E CONTABILIDADE (ISOLADAS POR USUÁRIO)
