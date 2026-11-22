@@ -178,6 +178,9 @@ function atualizarUIAuth() {
   const drawerLogado = document.getElementById('drawer-auth-logado');
   const drawerNome = document.getElementById('drawer-user-nome');
 
+  const btnNavConvites = document.getElementById('btn-nav-convites');
+  const btnDrawerConvites = document.getElementById('btn-drawer-convites');
+
   if (usuarioAtual && obterToken()) {
     if (divDeslogado) divDeslogado.classList.add('hidden');
     if (divLogado) {
@@ -190,6 +193,15 @@ function atualizarUIAuth() {
     if (drawerDeslogado) drawerDeslogado.classList.add('hidden');
     if (drawerLogado) drawerLogado.classList.remove('hidden');
     if (drawerNome) drawerNome.textContent = usuarioAtual.nome || 'Minha Fazenda';
+
+    // Controle de Acesso: Apenas Administrador vê os botões de gerenciamento de convites
+    if (usuarioAtual.role === 'admin') {
+      if (btnNavConvites) btnNavConvites.classList.remove('hidden');
+      if (btnDrawerConvites) btnDrawerConvites.classList.remove('hidden');
+    } else {
+      if (btnNavConvites) btnNavConvites.classList.add('hidden');
+      if (btnDrawerConvites) btnDrawerConvites.classList.add('hidden');
+    }
   } else {
     if (divDeslogado) divDeslogado.classList.remove('hidden');
     if (divLogado) {
@@ -200,8 +212,13 @@ function atualizarUIAuth() {
 
     if (drawerDeslogado) drawerDeslogado.classList.remove('hidden');
     if (drawerLogado) drawerLogado.classList.add('hidden');
+
+    // Deslogado nunca vê botões de convites
+    if (btnNavConvites) btnNavConvites.classList.add('hidden');
+    if (btnDrawerConvites) btnDrawerConvites.classList.add('hidden');
   }
 }
+
 
 
 // Abrir e fechar modal de auth
@@ -377,6 +394,10 @@ async function fazerLogout() {
 // GERENCIADOR DE CÓDIGOS DE CONVITE (ADMIN)
 // ==========================================
 function abrirModalConvites() {
+  if (!usuarioAtual || usuarioAtual.role !== 'admin') {
+    alert('Acesso Restrito: Apenas o Administrador do sistema tem permissão para acessar o gerenciador de convites.');
+    return;
+  }
   const modal = document.getElementById('modal-convites');
   if (!modal) return;
   modal.classList.remove('hidden');
@@ -396,7 +417,7 @@ async function carregarConvites() {
   container.innerHTML = '<div class="text-xs text-slate-500 py-3 text-center">Carregando códigos...</div>';
 
   try {
-    const res = await fetch('/api/convites');
+    const res = await authFetch('/api/convites');
     const data = await res.json();
     if (data.success && data.convites) {
       if (badge) badge.textContent = `${data.convites.length} códigos ativos`;
@@ -404,12 +425,14 @@ async function carregarConvites() {
       data.convites.forEach(c => {
         const item = document.createElement('div');
         item.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between gap-2";
+        const badgeRole = c.isAdmin ? '<span class="text-[9px] bg-red-100 text-red-800 font-extrabold px-1.5 py-0.5 rounded border border-red-300">ADMIN MASTER</span>' : '<span class="text-[9px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">PRODUTOR</span>';
         item.innerHTML = `
           <div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 flex-wrap">
               <span class="font-mono font-bold text-sm text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-lg border border-amber-300">
                 ${c.codigo}
               </span>
+              ${badgeRole}
               <span class="text-[10px] ${c.totalUsos > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'} font-semibold px-2 py-0.5 rounded-full">
                 ${c.totalUsos} de ${c.maxUsos} usados
               </span>
@@ -422,6 +445,8 @@ async function carregarConvites() {
         `;
         container.appendChild(item);
       });
+    } else {
+      container.innerHTML = `<div class="text-xs text-red-500 py-3 text-center">${data.message || 'Sem permissão.'}</div>`;
     }
   } catch (err) {
     container.innerHTML = '<div class="text-xs text-red-500 py-3 text-center">Erro ao carregar códigos.</div>';
@@ -441,7 +466,7 @@ async function submeterNovoConvite(e) {
   if (!codigo) return;
 
   try {
-    const res = await fetch('/api/convites', {
+    const res = await authFetch('/api/convites', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ codigo, maxUsos, descricao })
@@ -459,6 +484,7 @@ async function submeterNovoConvite(e) {
     alert('Erro ao conectar com o servidor.');
   }
 }
+
 
 function copiarConvite(codigo) {
   const mensagem = `Olá! Aqui está o seu código exclusivo para se cadastrar na plataforma de Contabilidade Pecuária: *${codigo}*\n\nAcesse o sistema e digite este código na tela de cadastro para liberar sua planilha!`;
