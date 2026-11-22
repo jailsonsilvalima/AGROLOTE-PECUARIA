@@ -124,11 +124,22 @@ const AUTH_TOKEN_KEY = 'agrolote_auth_token';
 const AUTH_USER_KEY = 'agrolote_usuario';
 let usuarioAtual = null;
 
+// Helper para validar permissão de Administrador Master
+function usuarioEhAdmin(u) {
+  if (!u) return false;
+  if (u.role === 'admin') return true;
+  if (u.email && String(u.email).trim().toLowerCase() === 'admin@agrolote.com') return true;
+  return false;
+}
+
 function obterToken() {
   return localStorage.getItem(AUTH_TOKEN_KEY);
 }
 
 function salvarSessao(token, usuario) {
+  if (usuario && usuarioEhAdmin(usuario)) {
+    usuario.role = 'admin';
+  }
   if (token) localStorage.setItem(AUTH_TOKEN_KEY, token);
   if (usuario) localStorage.setItem(AUTH_USER_KEY, JSON.stringify(usuario));
   usuarioAtual = usuario;
@@ -145,7 +156,12 @@ function limparSessao() {
 function recuperarSessaoLocal() {
   try {
     const usrStr = localStorage.getItem(AUTH_USER_KEY);
-    if (usrStr) usuarioAtual = JSON.parse(usrStr);
+    if (usrStr) {
+      usuarioAtual = JSON.parse(usrStr);
+      if (usuarioAtual && usuarioEhAdmin(usuarioAtual)) {
+        usuarioAtual.role = 'admin';
+      }
+    }
   } catch (e) {
     usuarioAtual = null;
   }
@@ -195,7 +211,7 @@ function atualizarUIAuth() {
     if (drawerNome) drawerNome.textContent = usuarioAtual.nome || 'Minha Fazenda';
 
     // Controle de Acesso: Apenas Administrador vê os botões de gerenciamento de convites
-    if (usuarioAtual.role === 'admin') {
+    if (usuarioEhAdmin(usuarioAtual)) {
       if (btnNavConvites) btnNavConvites.classList.remove('hidden');
       if (btnDrawerConvites) btnDrawerConvites.classList.remove('hidden');
     } else {
@@ -346,14 +362,8 @@ async function submeterCadastro(e) {
     return;
   }
 
-  if (!codigoConvite) {
-    exibirMensagemAuth('erro', '🔑 O Código de Convite é obrigatório para liberar seu cadastro. Solicite seu código ao administrador.');
-    document.getElementById('cadastro-codigo').focus();
-    return;
-  }
-
   btn.disabled = true;
-  btn.innerHTML = `<span>Validando código e criando conta...</span>`;
+  btn.innerHTML = `<span>Configurando sua conta e seu primeiro lote...</span>`;
 
   try {
     const res = await fetch('/api/auth/cadastro', {
@@ -364,19 +374,19 @@ async function submeterCadastro(e) {
     const data = await res.json();
     if (data.success && data.token) {
       salvarSessao(data.token, data.usuario);
-      exibirMensagemAuth('sucesso', `🎉 Parabéns, <strong>${data.usuario.nome}</strong>! Código autorizado e conta liberada com sucesso!`);
+      exibirMensagemAuth('sucesso', `🎉 Parabéns, <strong>${data.usuario.nome}</strong>! Sua fazenda foi liberada com sucesso!`);
       setTimeout(async () => {
         fecharModalAuth();
         await carregarLotes();
       }, 900);
     } else {
-      exibirMensagemAuth('erro', data.message || 'Código de convite inválido ou erro no cadastro.');
+      exibirMensagemAuth('erro', data.message || 'Erro ao realizar cadastro.');
     }
   } catch (err) {
     exibirMensagemAuth('erro', 'Erro de conexão com o servidor. Tente novamente.');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<span>⭐ Criar Minha Conta com Código</span>`;
+    btn.innerHTML = `<span>⭐ Criar Minha Conta Grátis</span>`;
   }
 }
 
@@ -391,11 +401,21 @@ async function fazerLogout() {
 }
 
 // ==========================================
-// GERENCIADOR DE CÓDIGOS DE CONVITE (ADMIN)
+// GERENCIADOR DE LINKS E CONVITES (ADMIN)
 // ==========================================
+
+function gerarCodigoAleatorioFront() {
+  const sufixo = Math.floor(1000 + Math.random() * 9000);
+  const inputCod = document.getElementById('novo-convite-codigo');
+  if (inputCod) {
+    inputCod.value = `AGRO-${sufixo}`;
+    inputCod.focus();
+  }
+}
+
 function abrirModalConvites() {
-  if (!usuarioAtual || usuarioAtual.role !== 'admin') {
-    alert('Acesso Restrito: Apenas o Administrador do sistema tem permissão para acessar o gerenciador de convites.');
+  if (!usuarioEhAdmin(usuarioAtual)) {
+    alert('Acesso Restrito: Apenas o Administrador do sistema tem permissão para acessar o gerenciador de links e convites.');
     return;
   }
   const modal = document.getElementById('modal-convites');
@@ -414,34 +434,65 @@ async function carregarConvites() {
   const badge = document.getElementById('convites-total-badge');
   if (!container) return;
 
-  container.innerHTML = '<div class="text-xs text-slate-500 py-3 text-center">Carregando códigos...</div>';
+  container.innerHTML = '<div class="text-xs text-slate-500 py-4 text-center">Carregando seus links de convite...</div>';
 
   try {
     const res = await authFetch('/api/convites');
     const data = await res.json();
     if (data.success && data.convites) {
-      if (badge) badge.textContent = `${data.convites.length} códigos ativos`;
+      if (badge) badge.textContent = `${data.convites.length} links ativos`;
       container.innerHTML = '';
+
+      if (data.convites.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 py-4 text-center">Nenhum link ativo no momento. Crie um novo acima!</div>';
+        return;
+      }
+
       data.convites.forEach(c => {
+        const link = `${window.location.origin}/?convite=${encodeURIComponent(c.codigo)}`;
         const item = document.createElement('div');
-        item.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between gap-2";
-        const badgeRole = c.isAdmin ? '<span class="text-[9px] bg-red-100 text-red-800 font-extrabold px-1.5 py-0.5 rounded border border-red-300">ADMIN MASTER</span>' : '<span class="text-[9px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">PRODUTOR</span>';
+        item.className = "bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2 hover:border-amber-300 transition-all";
+        
+        const badgeRole = c.isAdmin 
+          ? '<span class="text-[9px] bg-red-100 text-red-800 font-extrabold px-2 py-0.5 rounded-full border border-red-300">ADMIN MASTER</span>' 
+          : '<span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-300">PRODUTOR</span>';
+        
+        const badgeUsos = `<span class="text-[10px] ${c.totalUsos > 0 ? 'bg-blue-100 text-blue-800 font-bold' : 'bg-slate-100 text-slate-600 font-semibold'} px-2 py-0.5 rounded-full">
+          👥 ${c.totalUsos} de ${c.maxUsos} cadastrados
+        </span>`;
+
+        const btnExcluir = c.isAdmin ? '' : `
+          <button onclick="excluirConvite('${c.codigo}')" class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 text-xs transition-colors" title="Excluir este convite">
+            🗑️
+          </button>
+        `;
+
         item.innerHTML = `
-          <div>
+          <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="font-mono font-bold text-sm text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-lg border border-amber-300">
                 ${c.codigo}
               </span>
               ${badgeRole}
-              <span class="text-[10px] ${c.totalUsos > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'} font-semibold px-2 py-0.5 rounded-full">
-                ${c.totalUsos} de ${c.maxUsos} usados
-              </span>
+              ${badgeUsos}
             </div>
-            <p class="text-xs text-slate-500 mt-1">${c.descricao || 'Código de liberação'}</p>
+            ${btnExcluir}
           </div>
-          <button onclick="copiarConvite('${c.codigo}')" class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs border border-amber-300 flex items-center gap-1 transition-colors whitespace-nowrap" title="Copiar código para enviar">
-            <span>📋</span> Copiar
-          </button>
+
+          <p class="text-xs text-slate-500 font-medium">${c.descricao || 'Link de convite para produtor'}</p>
+
+          <div class="flex items-center gap-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200">
+            <input type="text" readonly value="${link}" class="w-full bg-transparent text-[11px] font-mono text-slate-700 select-all border-none outline-none px-1">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="copiarLinkDireto('${link}', '${c.codigo}')" class="py-2 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs border border-amber-300 flex items-center justify-center gap-1.5 transition-colors touch-target">
+              <span>📋</span> Copiar Link
+            </button>
+            <button onclick="enviarConviteWhatsApp('${link}', '${c.codigo}', '${(c.descricao || '').replace(/'/g, "\\'")}')" class="py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs border border-emerald-300 flex items-center justify-center gap-1.5 transition-colors touch-target">
+              <span>📲</span> WhatsApp
+            </button>
+          </div>
         `;
         container.appendChild(item);
       });
@@ -449,7 +500,7 @@ async function carregarConvites() {
       container.innerHTML = `<div class="text-xs text-red-500 py-3 text-center">${data.message || 'Sem permissão.'}</div>`;
     }
   } catch (err) {
-    container.innerHTML = '<div class="text-xs text-red-500 py-3 text-center">Erro ao carregar códigos.</div>';
+    container.innerHTML = '<div class="text-xs text-red-500 py-3 text-center">Erro ao carregar lista de links.</div>';
   }
 }
 
@@ -458,12 +509,19 @@ async function submeterNovoConvite(e) {
   const inputCod = document.getElementById('novo-convite-codigo');
   const inputMax = document.getElementById('novo-convite-max');
   const inputDesc = document.getElementById('novo-convite-desc');
+  const btn = document.getElementById('btn-submit-novo-convite');
 
-  const codigo = inputCod.value.trim().toUpperCase();
+  let codigo = inputCod ? inputCod.value.trim().toUpperCase().replace(/\s+/g, '-') : '';
+  if (!codigo) {
+    codigo = `AGRO-${Math.floor(1000 + Math.random() * 9000)}`;
+  }
   const maxUsos = Number(inputMax.value) || 50;
-  const descricao = inputDesc.value.trim();
+  const descricao = inputDesc ? inputDesc.value.trim() : '';
 
-  if (!codigo) return;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>Gerando link...</span>';
+  }
 
   try {
     const res = await authFetch('/api/convites', {
@@ -472,27 +530,72 @@ async function submeterNovoConvite(e) {
       body: JSON.stringify({ codigo, maxUsos, descricao })
     });
     const data = await res.json();
-    if (data.success) {
-      alert(`Código ${codigo} criado com sucesso!`);
-      inputCod.value = '';
-      inputDesc.value = '';
+    if (data.success && data.convite) {
+      const link = `${window.location.origin}/?convite=${encodeURIComponent(data.convite.codigo)}`;
+      
+      // Exibir caixa de destaque com o link gerado
+      const boxDestaque = document.getElementById('box-ultimo-link-gerado');
+      const textoLink = document.getElementById('texto-ultimo-link-gerado');
+      const btnCopiar = document.getElementById('btn-copiar-ultimo-link');
+      const btnWhats = document.getElementById('btn-whatsapp-ultimo-link');
+
+      if (boxDestaque && textoLink) {
+        textoLink.textContent = link;
+        boxDestaque.classList.remove('hidden');
+
+        if (btnCopiar) {
+          btnCopiar.onclick = () => copiarLinkDireto(link, data.convite.codigo);
+        }
+        if (btnWhats) {
+          btnWhats.onclick = () => enviarConviteWhatsApp(link, data.convite.codigo, data.convite.descricao);
+        }
+      }
+
+      if (inputCod) inputCod.value = '';
+      if (inputDesc) inputDesc.value = '';
+
       await carregarConvites();
     } else {
-      alert(data.message || 'Erro ao criar código.');
+      alert(data.message || 'Erro ao gerar link de convite.');
     }
   } catch (err) {
-    alert('Erro ao conectar com o servidor.');
+    alert('Erro ao conectar com o servidor para gerar link.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>🔗 Criar e Disponibilizar Link</span>';
+    }
   }
 }
 
-
-function copiarConvite(codigo) {
-  const mensagem = `Olá! Aqui está o seu código exclusivo para se cadastrar na plataforma de Contabilidade Pecuária: *${codigo}*\n\nAcesse o sistema e digite este código na tela de cadastro para liberar sua planilha!`;
-  navigator.clipboard.writeText(mensagem).then(() => {
-    alert(`Código "${codigo}" e mensagem copiados com sucesso!\n\nAgora você pode colar e enviar no WhatsApp do produtor.`);
+function copiarLinkDireto(link, codigo) {
+  navigator.clipboard.writeText(link).then(() => {
+    alert(`✅ Link copiado com sucesso!\n\n${link}\n\nAgora você pode colar no WhatsApp ou enviar para o produtor.`);
   }).catch(() => {
-    prompt('Copie o código abaixo:', codigo);
+    prompt('Copie o link abaixo:', link);
   });
+}
+
+function enviarConviteWhatsApp(link, codigo, descricao) {
+  const descTexto = descricao ? ` (${descricao})` : '';
+  const mensagem = `Olá! Segue seu link de acesso exclusivo para o Sistema de Contabilidade Pecuária (AgroLote)${descTexto}:\n\n👉 ${link}\n\nBasta clicar no link acima para abrir a tela e criar sua conta com seu acesso liberado!`;
+  const urlWhats = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`;
+  window.open(urlWhats, '_blank');
+}
+
+async function excluirConvite(codigo) {
+  if (!confirm(`Deseja realmente excluir o link com código "${codigo}"?`)) return;
+  try {
+    const res = await authFetch(`/api/convites/${encodeURIComponent(codigo)}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      await carregarConvites();
+    } else {
+      alert(data.message || 'Erro ao excluir link.');
+    }
+  } catch (e) {
+    alert('Erro ao conectar com o servidor.');
+  }
 }
 
 // Inicialização ao carregar a página
@@ -508,6 +611,20 @@ document.addEventListener('DOMContentLoaded', () => {
   recuperarSessaoLocal();
   atualizarUIAuth();
   carregarLotes();
+
+  // Reconhecimento de Link de Convite na URL (?convite=CODIGO ou ?ref=CODIGO)
+  const params = new URLSearchParams(window.location.search);
+  const conviteUrl = params.get('convite') || params.get('ref') || params.get('codigo');
+  if (conviteUrl) {
+    const codLimpo = conviteUrl.trim().toUpperCase();
+    abrirModalAuth('cadastro');
+    const inputCod = document.getElementById('cadastro-codigo');
+    if (inputCod) {
+      inputCod.value = codLimpo;
+      inputCod.classList.add('bg-amber-50', 'border-amber-400');
+    }
+    exibirMensagemAuth('sucesso', `🎉 <strong>Link de convite reconhecido!</strong><br>Código: <code>${codLimpo}</code> aplicado com sucesso. Preencha seus dados para começar!`);
+  }
 });
 
 // Carregar lista de lotes da API (isolada por usuário)
@@ -515,8 +632,11 @@ async function carregarLotes() {
   try {
     const res = await authFetch('/api/lotes');
     const data = await res.json();
-    if (data.usuario && (!usuarioAtual || usuarioAtual.id !== data.usuario.id)) {
-      usuarioAtual = data.usuario;
+    if (data.usuario) {
+      usuarioAtual = { ...usuarioAtual, ...data.usuario };
+      if (usuarioEhAdmin(usuarioAtual)) {
+        usuarioAtual.role = 'admin';
+      }
       atualizarUIAuth();
     }
     if (data.success && data.lotes && data.lotes.length > 0) {
