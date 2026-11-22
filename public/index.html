@@ -230,16 +230,17 @@
   <div id="banner-visitante" class="bg-gradient-to-r from-amber-600 via-emerald-700 to-teal-800 text-white text-xs py-2 px-4 shadow-inner">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
       <div class="flex items-center gap-2 text-center sm:text-left">
-        <span class="text-base">🔒</span>
-        <span><strong>Modo Demonstração (Somente Leitura):</strong> Você está visualizando uma prévia de como o sistema funciona. Não é possível alterar dados neste modo. Para cadastrar e gerenciar seus próprios animais, <strong>solicite um código e cadastre-se</strong>!</span>
+        <span class="text-base">✨</span>
+        <span><strong>Modo Demonstração:</strong> Você está visualizando uma prévia de como o sistema funciona. Para cadastrar e gerenciar seus próprios animais e ter sua própria planilha, <strong>crie sua conta grátis</strong> agora mesmo!</span>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="abrirModalAuth('cadastro')" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-3.5 py-1 rounded-lg shadow transition-colors whitespace-nowrap text-xs flex items-center gap-1">
-          <span>🔑</span> Cadastrar com Código →
+          <span>⭐</span> Criar Conta Grátis →
         </button>
       </div>
     </div>
   </div>
+
 
   <!-- BARRA DE SELEÇÃO RÁPIDA DE ANIMAIS TÍPICOS -->
   <div class="bg-white border-b border-slate-200 py-2.5 px-4 sm:px-8">
@@ -1481,27 +1482,28 @@
             <p class="text-[11px] text-slate-500 mt-1">Sua conta já iniciará com uma planilha configurada para este animal!</p>
           </div>
 
-          <!-- CAMPO OBRIGATÓRIO: CÓDIGO DE CONVITE -->
-          <div class="bg-amber-50/90 p-3.5 rounded-2xl border-2 border-amber-300 shadow-sm">
+          <!-- CAMPO OPCIONAL: CÓDIGO DE CONVITE -->
+          <div class="bg-slate-100/90 p-3.5 rounded-2xl border border-slate-200 shadow-sm">
             <div class="flex justify-between items-center mb-1">
-              <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider">
-                🔑 Código de Convite / Autorização *
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                🔑 Código de Convite (Opcional)
               </label>
-              <span class="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full border border-amber-300">
-                Obrigatório
+              <span class="text-[10px] bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full border border-slate-300">
+                Opcional
               </span>
             </div>
-            <input type="text" id="cadastro-codigo" required placeholder="Ex: ABCD-0000 (Exemplo fictício)" class="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 text-sm font-bold tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900 placeholder-slate-400">
-            <p class="text-[11px] text-amber-800 mt-1 leading-snug">
-              O código acima é apenas um exemplo fictício e não funciona. Solicite seu código de acesso real com o proprietário do sistema para liberar sua conta.
+            <input type="text" id="cadastro-codigo" placeholder="Deixe em branco ou digite seu código" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900 placeholder-slate-400">
+            <p class="text-[11px] text-slate-500 mt-1 leading-snug">
+              Não tem código? <strong>Pode deixar em branco</strong> para se cadastrar livremente sem código de acesso!
             </p>
           </div>
 
           <div class="pt-2">
-            <button type="submit" id="btn-submit-cadastro" class="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
-              <span>⭐ Criar Minha Conta com Código</span>
+            <button type="submit" id="btn-submit-cadastro" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 touch-target">
+              <span>⭐ Criar Minha Conta Grátis</span>
             </button>
           </div>
+
 
           <div class="text-center pt-2">
             <p class="text-xs text-slate-500">
