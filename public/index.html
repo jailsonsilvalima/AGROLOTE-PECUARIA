@@ -108,9 +108,9 @@
               💾
             </a>
 
-            <!-- BOTÃO GERENCIAR CÓDIGOS DE CONVITE -->
-            <button onclick="abrirModalConvites()" title="Gerenciar Códigos de Convite de Acesso" class="px-2.5 py-1.5 text-amber-300 hover:text-white rounded-lg hover:bg-emerald-800 text-xs transition-colors flex items-center gap-1 font-semibold border border-amber-400/40 bg-emerald-950/40">
-              <span>🔑</span> <span>Convites</span>
+            <!-- BOTÃO GERENCIAR CÓDIGOS DE CONVITE (EXCLUSIVO ADMINISTRADOR) -->
+            <button id="btn-nav-convites" onclick="abrirModalConvites()" title="Gerenciar Códigos de Convite de Acesso (Exclusivo Administrador)" class="hidden px-2.5 py-1.5 text-amber-300 hover:text-white rounded-lg hover:bg-emerald-800 text-xs transition-colors flex items-center gap-1 font-semibold border border-amber-400/40 bg-emerald-950/40">
+              <span>🔑</span> <span>Convites (Admin)</span>
             </button>
 
             <!-- ÁREA DE AUTENTICAÇÃO / USUÁRIO (DESKTOP) -->
@@ -174,9 +174,11 @@
             <span class="text-lg">➕</span> Criar Novo Lote de Animais
           </button>
 
-          <button onclick="fecharMenuMobile(); abrirModalConvites()" class="w-full py-3 px-4 rounded-xl bg-amber-500/20 border border-amber-400/40 hover:bg-amber-500/30 text-amber-300 font-bold text-sm flex items-center gap-2.5 touch-target">
-            <span class="text-lg">🔑</span> Gerenciador de Convites
+          <!-- BOTÃO GERENCIAR CONVITES NO DRAWER (EXCLUSIVO ADMINISTRADOR) -->
+          <button id="btn-drawer-convites" onclick="fecharMenuMobile(); abrirModalConvites()" class="hidden w-full py-3 px-4 rounded-xl bg-amber-500/20 border border-amber-400/40 hover:bg-amber-500/30 text-amber-300 font-bold text-sm flex items-center gap-2.5 touch-target">
+            <span class="text-lg">🔑</span> Gerenciador de Convites (Admin)
           </button>
+
 
           <a href="/api/backup" download="backup_pecuaria.json" onclick="fecharMenuMobile()" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm flex items-center gap-2.5 touch-target">
             <span class="text-lg">💾</span> Baixar Backup da Planilha
