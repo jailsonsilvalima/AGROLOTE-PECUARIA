@@ -621,28 +621,28 @@ app.post('/api/auth/cadastro', (req, res) => {
     return res.status(400).json({ success: false, message: 'Nome, e-mail e senha são obrigatórios.' });
   }
 
-  // 1. Validação obrigatória do Código de Convite
+  // Validação do Código de Convite (Opcional: permite cadastro livre sem código)
   const codigoInformado = String(codigoConvite || '').trim().toUpperCase();
-  if (!codigoInformado) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'O Código de Convite / Autorização é obrigatório. Solicite seu código de acesso com o administrador para criar sua conta.' 
-    });
-  }
+  let ehAdmin = false;
+  let convite = null;
 
-  const convite = (db.codigosConvite || []).find(c => String(c.codigo).trim().toUpperCase() === codigoInformado && c.ativo !== false);
-  if (!convite) {
-    return res.status(403).json({ 
-      success: false, 
-      message: 'Código de convite inválido ou inativo. Verifique se digitou corretamente ou solicite um código válido com o administrador.' 
-    });
-  }
+  if (codigoInformado) {
+    convite = (db.codigosConvite || []).find(c => String(c.codigo).trim().toUpperCase() === codigoInformado && c.ativo !== false);
+    if (!convite) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Código de convite inválido ou inativo. Deixe o campo em branco para se cadastrar livremente ou informe um código válido.' 
+      });
+    }
 
-  if (convite.maxUsos && (convite.usadoPor || []).length >= convite.maxUsos) {
-    return res.status(403).json({ 
-      success: false, 
-      message: 'Este código de convite já atingiu o limite máximo de cadastros. Solicite um novo código ao administrador.' 
-    });
+    if (convite.maxUsos && (convite.usadoPor || []).length >= convite.maxUsos) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Este código de convite já atingiu o limite máximo de cadastros.' 
+      });
+    }
+
+    ehAdmin = convite.isAdmin === true;
   }
 
   if (senha.length < 4) {
@@ -655,28 +655,29 @@ app.post('/api/auth/cadastro', (req, res) => {
     return res.status(400).json({ success: false, message: 'Já existe uma conta cadastrada com este e-mail. Faça login.' });
   }
 
-  const ehAdmin = convite.isAdmin === true;
-
   const novoUsuario = {
     id: `usr-${Date.now()}`,
     nome: String(nome).trim(),
     email: emailNorm,
     senhaHash: hashSenha(String(senha)),
     role: ehAdmin ? 'admin' : 'produtor',
-    codigoConviteUtilizado: codigoInformado,
+    codigoConviteUtilizado: codigoInformado || null,
     criadoEm: new Date().toISOString()
   };
 
   db.usuarios.push(novoUsuario);
 
-  // Registrar uso no convite
-  convite.usadoPor = convite.usadoPor || [];
-  convite.usadoPor.push({
-    usuarioId: novoUsuario.id,
-    nome: novoUsuario.nome,
-    email: novoUsuario.email,
-    usadoEm: new Date().toISOString()
-  });
+  // Registrar uso no convite caso tenha sido informado
+  if (convite) {
+    convite.usadoPor = convite.usadoPor || [];
+    convite.usadoPor.push({
+      usuarioId: novoUsuario.id,
+      nome: novoUsuario.nome,
+      email: novoUsuario.email,
+      usadoEm: new Date().toISOString()
+    });
+  }
+
 
   // Criar lote inicial exclusivo para este novo produtor
   const primeiroLote = criarLoteBoasVindas(novoUsuario.id, animalPrincipal || 'bovino');
