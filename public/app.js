@@ -174,6 +174,10 @@ function atualizarUIAuth() {
   const spanNome = document.getElementById('nav-user-nome');
   const bannerVisitante = document.getElementById('banner-visitante');
 
+  const drawerDeslogado = document.getElementById('drawer-auth-deslogado');
+  const drawerLogado = document.getElementById('drawer-auth-logado');
+  const drawerNome = document.getElementById('drawer-user-nome');
+
   if (usuarioAtual && obterToken()) {
     if (divDeslogado) divDeslogado.classList.add('hidden');
     if (divLogado) {
@@ -182,6 +186,10 @@ function atualizarUIAuth() {
     }
     if (spanNome) spanNome.textContent = usuarioAtual.nome || 'Minha Fazenda';
     if (bannerVisitante) bannerVisitante.classList.add('hidden');
+
+    if (drawerDeslogado) drawerDeslogado.classList.add('hidden');
+    if (drawerLogado) drawerLogado.classList.remove('hidden');
+    if (drawerNome) drawerNome.textContent = usuarioAtual.nome || 'Minha Fazenda';
   } else {
     if (divDeslogado) divDeslogado.classList.remove('hidden');
     if (divLogado) {
@@ -189,8 +197,12 @@ function atualizarUIAuth() {
       divLogado.classList.remove('flex');
     }
     if (bannerVisitante) bannerVisitante.classList.remove('hidden');
+
+    if (drawerDeslogado) drawerDeslogado.classList.remove('hidden');
+    if (drawerLogado) drawerLogado.classList.add('hidden');
   }
 }
+
 
 // Abrir e fechar modal de auth
 function abrirModalAuth(aba = 'login') {
@@ -729,12 +741,15 @@ function mudarAba(aba) {
   abas.forEach(a => {
     const el = document.getElementById(`aba-${a}`);
     const btn = document.getElementById(`tab-btn-${a}`);
+    const bnav = document.getElementById(`bnav-btn-${a}`);
     if (a === aba) {
       if (el) el.classList.remove('hidden');
       if (btn) btn.className = "pb-3 px-2 border-b-2 border-emerald-600 text-emerald-700 flex items-center gap-1.5 whitespace-nowrap font-bold";
+      if (bnav) bnav.className = "flex flex-col items-center justify-center flex-1 py-1 text-emerald-600 font-bold transition-colors";
     } else {
       if (el) el.classList.add('hidden');
       if (btn) btn.className = "pb-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap font-semibold";
+      if (bnav) bnav.className = "flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-slate-700 font-medium transition-colors";
     }
   });
 
@@ -742,6 +757,7 @@ function mudarAba(aba) {
     renderRelatorios();
   }
 }
+
 
 // ==============================================================
 // MÓDULO DE RELATÓRIOS DETALHADOS
@@ -1892,3 +1908,27 @@ async function salvarNovoLote(e) {
     alert('Erro ao criar novo lote.');
   }
 }
+
+// ==========================================
+// CONTROLE DO MENU MOBILE (CELULAR & TABLET)
+// ==========================================
+function toggleMenuMobile() {
+  const menu = document.getElementById('menu-mobile-drawer');
+  if (!menu) return;
+  if (menu.classList.contains('hidden')) {
+    menu.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Evita scroll do fundo
+  } else {
+    menu.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+}
+
+function fecharMenuMobile() {
+  const menu = document.getElementById('menu-mobile-drawer');
+  if (menu) {
+    menu.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+}
+
