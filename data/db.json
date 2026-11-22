@@ -690,6 +690,196 @@
           "obs": "Animal #6"
         }
       ]
+    },
+    {
+      "id": "lote-1795367191360",
+      "usuarioId": "usr-1795367191359",
+      "nome": "Lote 01 - Meus Bovinos de Corte",
+      "categoria": "bovino",
+      "icone": "🐂",
+      "especie": "Bovinos (Gado de Corte)",
+      "racaPredominante": "Nelore / Sertanejo",
+      "qtdAnimais": 6,
+      "dataEntrada": "2026-11-22",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-02-20",
+      "status": "ativo",
+      "compraPorCabeca": 2600,
+      "freteEntrada": 400,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "cabeca",
+      "vendaPorCabecaEstimada": 4450,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 510,
+      "rendimentoCarcaçaPct": 54,
+      "precoArroba": 245,
+      "precoKgVivo": 11,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 0,
+      "despesas": [
+        {
+          "id": "d-1",
+          "tipo": "racao",
+          "data": "2026-11-22",
+          "descricao": "Ração de Adaptação (14% PB)",
+          "qtd": 10,
+          "unidade": "Sacos 40kg",
+          "valorUnitario": 75,
+          "valorTotal": 750,
+          "obs": "Início do lote"
+        },
+        {
+          "id": "d-2",
+          "tipo": "medicamento",
+          "data": "2026-11-22",
+          "descricao": "Vacina Clostridiose + Vermífugo",
+          "qtd": 6,
+          "unidade": "doses",
+          "valorUnitario": 12,
+          "valorTotal": 72,
+          "obs": "Protocolo sanitário inicial"
+        }
+      ],
+      "animais": [
+        {
+          "brinco": "BOV-01",
+          "raca": "Nelore",
+          "pesoEntradaKg": 360,
+          "pesoAbateKg": 520,
+          "obs": "Animal #1"
+        },
+        {
+          "brinco": "BOV-02",
+          "raca": "Nelore",
+          "pesoEntradaKg": 370,
+          "pesoAbateKg": 535,
+          "obs": "Animal #2"
+        },
+        {
+          "brinco": "BOV-03",
+          "raca": "Guzerá",
+          "pesoEntradaKg": 350,
+          "pesoAbateKg": 505,
+          "obs": "Animal #3"
+        },
+        {
+          "brinco": "BOV-04",
+          "raca": "Nelore",
+          "pesoEntradaKg": 380,
+          "pesoAbateKg": 540,
+          "obs": "Animal #4"
+        },
+        {
+          "brinco": "BOV-05",
+          "raca": "Mestiço",
+          "pesoEntradaKg": 345,
+          "pesoAbateKg": 495,
+          "obs": "Animal #5"
+        },
+        {
+          "brinco": "BOV-06",
+          "raca": "Nelore",
+          "pesoEntradaKg": 365,
+          "pesoAbateKg": 525,
+          "obs": "Animal #6"
+        }
+      ]
+    },
+    {
+      "id": "lote-1795367191372",
+      "usuarioId": "usr-1795367191371",
+      "nome": "Lote 01 - Meus Bovinos de Corte",
+      "categoria": "bovino",
+      "icone": "🐂",
+      "especie": "Bovinos (Gado de Corte)",
+      "racaPredominante": "Nelore / Sertanejo",
+      "qtdAnimais": 6,
+      "dataEntrada": "2026-11-22",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-02-20",
+      "status": "ativo",
+      "compraPorCabeca": 2600,
+      "freteEntrada": 400,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "cabeca",
+      "vendaPorCabecaEstimada": 4450,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 510,
+      "rendimentoCarcaçaPct": 54,
+      "precoArroba": 245,
+      "precoKgVivo": 11,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 0,
+      "despesas": [
+        {
+          "id": "d-1",
+          "tipo": "racao",
+          "data": "2026-11-22",
+          "descricao": "Ração de Adaptação (14% PB)",
+          "qtd": 10,
+          "unidade": "Sacos 40kg",
+          "valorUnitario": 75,
+          "valorTotal": 750,
+          "obs": "Início do lote"
+        },
+        {
+          "id": "d-2",
+          "tipo": "medicamento",
+          "data": "2026-11-22",
+          "descricao": "Vacina Clostridiose + Vermífugo",
+          "qtd": 6,
+          "unidade": "doses",
+          "valorUnitario": 12,
+          "valorTotal": 72,
+          "obs": "Protocolo sanitário inicial"
+        }
+      ],
+      "animais": [
+        {
+          "brinco": "BOV-01",
+          "raca": "Nelore",
+          "pesoEntradaKg": 360,
+          "pesoAbateKg": 520,
+          "obs": "Animal #1"
+        },
+        {
+          "brinco": "BOV-02",
+          "raca": "Nelore",
+          "pesoEntradaKg": 370,
+          "pesoAbateKg": 535,
+          "obs": "Animal #2"
+        },
+        {
+          "brinco": "BOV-03",
+          "raca": "Guzerá",
+          "pesoEntradaKg": 350,
+          "pesoAbateKg": 505,
+          "obs": "Animal #3"
+        },
+        {
+          "brinco": "BOV-04",
+          "raca": "Nelore",
+          "pesoEntradaKg": 380,
+          "pesoAbateKg": 540,
+          "obs": "Animal #4"
+        },
+        {
+          "brinco": "BOV-05",
+          "raca": "Mestiço",
+          "pesoEntradaKg": 345,
+          "pesoAbateKg": 495,
+          "obs": "Animal #5"
+        },
+        {
+          "brinco": "BOV-06",
+          "raca": "Nelore",
+          "pesoEntradaKg": 365,
+          "pesoAbateKg": 525,
+          "obs": "Animal #6"
+        }
+      ]
     }
   ],
   "usuarios": [
@@ -736,68 +926,84 @@
       "senhaHash": "ddae336b13e9c45c5be1bb4d12481d53:4dc320ce3263404d8135c279dafb8294183d0e6870c3050bd0cf8361811cccc12dc09780c06ce096136fd885ccbd28d2eb8b5be25821ac04fff8fdc6d16305e9",
       "codigoConviteUtilizado": "AMIGO-ZE",
       "criadoEm": "2026-11-22T16:17:20.860Z"
+    },
+    {
+      "id": "usr-1795367191359",
+      "nome": "Produtor Comum",
+      "email": "produtor_teste_1795367191340@teste.com",
+      "senhaHash": "9b0fdf29364ff28047caf99b893b99f1:b82090931dcc3678835a9f102211821ce2daeb56637dad5876d09735d5d48da72b2b6afeabe38a1bc8475fee026dff6e5a5e62930fca96907e1484136520325d",
+      "role": "produtor",
+      "codigoConviteUtilizado": "AGRO-PARCEIRO-01",
+      "criadoEm": "2026-11-22T17:06:31.360Z"
+    },
+    {
+      "id": "usr-1795367191371",
+      "nome": "Administrador Dono",
+      "email": "admin_teste_1795367191367@teste.com",
+      "senhaHash": "a92c88ef07694356abf1681ed293382e:0993de0468d77bf5842ca2c891dcd8d4a1654ffd89614a740c5a57c44745b4678dda79e2f854e0d5f9ac0b60a3f7effdc76fd78259c125e267e51efb083593ba",
+      "role": "admin",
+      "codigoConviteUtilizado": "ADMIN-MESTRE-2026",
+      "criadoEm": "2026-11-22T17:06:31.372Z"
     }
   ],
   "sessoes": {
     "1d09d7f384c020e92045dbb0e347a627b8b6d525f65fd55856ff08e0f716ce54": "usr-1795363341633",
     "06658ca9ce1d29159d46e92e0e5246cc7c045fb109c9367ad79c5bf4e767a4e6": "usr-1795363547944",
     "19457de4b251672754dd0397cdc009a8b5f034a2683bb298019097142db86992": "usr-1795364042641",
-    "51b2f25f551cd68ef13060854f23849da2a9c60c48c3c09ff5dab270fd18fb71": "usr-1795364240860"
+    "51b2f25f551cd68ef13060854f23849da2a9c60c48c3c09ff5dab270fd18fb71": "usr-1795364240860",
+    "8e2c10bce241f97e038c8f680bdbc552c575051cadf2d77f766d7caf891861e9": "usr-1795367191359",
+    "c2b1d9887336c403bc01c86ba86e41c9e6e421cec45dd249f02051adde9e8651": "usr-1795367191371"
   },
   "codigosConvite": [
     {
-      "codigo": "AGRO2026",
-      "descricao": "Código Padrão Agro 2026",
-      "maxUsos": 999,
+      "codigo": "ADMIN-MESTRE-2026",
+      "descricao": "Código Mestre do Dono / Administrador Geral (Permite Gerar Convites)",
+      "isAdmin": true,
+      "maxUsos": 5,
       "usadoPor": [
         {
-          "usuarioId": "usr-1795364042641",
-          "nome": "Produtor Autorizado",
-          "email": "autorizado@teste.com",
-          "usadoEm": "2026-11-22T16:14:02.642Z"
+          "usuarioId": "usr-1795367191371",
+          "nome": "Administrador Dono",
+          "email": "admin_teste_1795367191367@teste.com",
+          "usadoEm": "2026-11-22T17:06:31.372Z"
         }
       ],
       "ativo": true,
-      "criadoEm": "2026-11-22T16:14:02.629Z"
+      "criadoEm": "2026-11-22T17:06:01.367Z"
     },
     {
-      "codigo": "NORDESTE88",
-      "descricao": "Produtores da Região Nordeste",
-      "maxUsos": 100,
-      "usadoPor": [],
-      "ativo": true,
-      "criadoEm": "2026-11-22T16:14:02.629Z"
-    },
-    {
-      "codigo": "FAZENDA-VIP",
-      "descricao": "Convite Especial Fazenda VIP",
-      "maxUsos": 50,
-      "usadoPor": [],
-      "ativo": true,
-      "criadoEm": "2026-11-22T16:14:02.629Z"
-    },
-    {
-      "codigo": "CONVITE-LUCAS",
-      "descricao": "Código Pessoal do Administrador",
-      "maxUsos": 100,
-      "usadoPor": [],
-      "ativo": true,
-      "criadoEm": "2026-11-22T16:14:02.629Z"
-    },
-    {
-      "codigo": "AMIGO-ZE",
-      "descricao": "Para o José da Bahia",
+      "codigo": "AGRO-PARCEIRO-01",
+      "descricao": "Convite Produtor Parceiro 1 (Acesso exclusivo à sua própria planilha)",
+      "isAdmin": false,
       "maxUsos": 10,
       "usadoPor": [
         {
-          "usuarioId": "usr-1795364240860",
-          "nome": "José da Silva",
-          "email": "jose_bahia@agro.com",
-          "usadoEm": "2026-11-22T16:17:20.860Z"
+          "usuarioId": "usr-1795367191359",
+          "nome": "Produtor Comum",
+          "email": "produtor_teste_1795367191340@teste.com",
+          "usadoEm": "2026-11-22T17:06:31.360Z"
         }
       ],
       "ativo": true,
-      "criadoEm": "2026-11-22T16:17:20.857Z"
+      "criadoEm": "2026-11-22T17:06:01.367Z"
+    },
+    {
+      "codigo": "AGRO-PARCEIRO-02",
+      "descricao": "Convite Produtor Parceiro 2 (Acesso exclusivo à sua própria planilha)",
+      "isAdmin": false,
+      "maxUsos": 10,
+      "usadoPor": [],
+      "ativo": true,
+      "criadoEm": "2026-11-22T17:06:01.367Z"
+    },
+    {
+      "codigo": "AGRO-PARCEIRO-03",
+      "descricao": "Convite Produtor Parceiro 3 (Acesso exclusivo à sua própria planilha)",
+      "isAdmin": false,
+      "maxUsos": 10,
+      "usadoPor": [],
+      "ativo": true,
+      "criadoEm": "2026-11-22T17:06:01.367Z"
     }
   ]
 }
