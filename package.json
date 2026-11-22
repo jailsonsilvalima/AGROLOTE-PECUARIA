@@ -1,0 +1,24 @@
+{
+  "name": "sistema-pecuaria-web",
+  "version": "1.0.0",
+  "description": "Sistema Online de Contabilidade Pecuária e Gestão de Lotes de Animais",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "pecuaria",
+    "confinamento",
+    "lotes",
+    "contabilidade",
+    "lucro",
+    "abate"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
