@@ -625,7 +625,15 @@ async function carregarUsuariosAdmin() {
     if (data.success && data.usuarios) {
       container.innerHTML = '';
       if (data.usuarios.length === 0) {
-        container.innerHTML = '<div class="text-xs text-slate-400 py-4 text-center">Nenhum produtor cadastrado no sistema ainda.</div>';
+        container.innerHTML = `
+          <div class="bg-white p-6 rounded-2xl border border-dashed border-slate-300 text-center space-y-2">
+            <div class="text-3xl">✨</div>
+            <p class="text-xs font-bold text-slate-800">Nenhum código foi resgatado ainda</p>
+            <p class="text-[11px] text-slate-500 max-w-xs mx-auto">
+              Todos os seus links estão 100% disponíveis e livres para novos cadastros. Assim que um produtor se cadastrar, o nome e o e-mail dele aparecerão automaticamente aqui em tempo real!
+            </p>
+          </div>
+        `;
         return;
       }
 
