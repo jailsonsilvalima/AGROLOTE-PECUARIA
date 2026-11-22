@@ -457,12 +457,19 @@ function bloquearEscritaVisitante(req, res, next) {
   next();
 }
 
+function ehUsuarioAdmin(usuario) {
+  if (!usuario) return false;
+  if (usuario.role === 'admin') return true;
+  if (usuario.email && String(usuario.email).trim().toLowerCase() === 'admin@agrolote.com') return true;
+  return false;
+}
+
 // Middleware para exigir nível de Administrador (Dono do Sistema)
 function exigirAdmin(req, res, next) {
-  if (req.isVisitante || !req.usuario || req.usuario.role !== 'admin') {
+  if (req.isVisitante || !ehUsuarioAdmin(req.usuario)) {
     return res.status(403).json({
       success: false,
-      message: "Acesso Restrito: Apenas o Administrador do sistema tem permissão para visualizar e gerar códigos de convite."
+      message: "Acesso Restrito: Apenas o Administrador do sistema tem permissão para visualizar e gerar links e códigos de convite."
     });
   }
   next();
@@ -720,6 +727,11 @@ app.post('/api/auth/login', (req, res) => {
 
   const token = gerarToken();
   db.sessoes[token] = usuario.id;
+
+  const ehAdmin = ehUsuarioAdmin(usuario);
+  if (ehAdmin && usuario.role !== 'admin') {
+    usuario.role = 'admin';
+  }
   writeDb(db);
 
   res.json({
@@ -730,7 +742,7 @@ app.post('/api/auth/login', (req, res) => {
       id: usuario.id,
       nome: usuario.nome,
       email: usuario.email,
-      role: usuario.role || 'produtor'
+      role: ehAdmin ? 'admin' : (usuario.role || 'produtor')
     }
   });
 });
@@ -740,13 +752,14 @@ app.get('/api/auth/me', autenticarUsuario, (req, res) => {
   if (!req.usuario) {
     return res.status(401).json({ success: false, message: 'Não autenticado' });
   }
+  const ehAdmin = ehUsuarioAdmin(req.usuario);
   res.json({
     success: true,
     usuario: {
       id: req.usuario.id,
       nome: req.usuario.nome,
       email: req.usuario.email,
-      role: req.usuario.role || 'produtor'
+      role: ehAdmin ? 'admin' : (req.usuario.role || 'produtor')
     }
   });
 });
@@ -766,45 +779,52 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 // ==========================================
-// ROTAS DE CÓDIGOS DE CONVITE (GERENCIAMENTO)
+// ROTAS DE CÓDIGOS E LINKS DE CONVITE (GERENCIAMENTO ADMIN)
 // ==========================================
 
-// Listar códigos de convite disponíveis e estatísticas (SOMENTE ADMINISTRADOR)
+// Listar links e códigos de convite disponíveis (SOMENTE ADMINISTRADOR)
 app.get('/api/convites', autenticarUsuario, exigirAdmin, (req, res) => {
   const db = readDb();
+  const host = req.get('host');
+  const protocol = req.protocol;
+  const baseUrl = `${protocol}://${host}`;
+
   const lista = (db.codigosConvite || []).map(c => ({
     codigo: c.codigo,
+    linkCompleto: `${baseUrl}/?convite=${encodeURIComponent(c.codigo)}`,
     descricao: c.descricao,
     ativo: c.ativo !== false,
     isAdmin: !!c.isAdmin,
     maxUsos: c.maxUsos || 999,
     totalUsos: (c.usadoPor || []).length,
     vagasRestantes: Math.max(0, (c.maxUsos || 999) - (c.usadoPor || []).length),
+    usadoPor: (c.usadoPor || []).map(u => ({ nome: u.nome, email: u.email, usadoEm: u.usadoEm })),
     criadoEm: c.criadoEm
   }));
   res.json({ success: true, convites: lista });
 });
 
-// Criar novo código de convite para enviar a um cliente (SOMENTE ADMINISTRADOR)
+// Criar novo código e link de convite (SOMENTE ADMINISTRADOR)
 app.post('/api/convites', autenticarUsuario, exigirAdmin, (req, res) => {
   const db = readDb();
-  const { codigo, descricao, maxUsos } = req.body;
+  let { codigo, descricao, maxUsos } = req.body;
 
-  if (!codigo) {
-    return res.status(400).json({ success: false, message: 'O texto do código é obrigatório.' });
+  // Se não informou código, gerar um código automático limpo
+  if (!codigo || !String(codigo).trim()) {
+    codigo = `AGRO-${Math.floor(1000 + Math.random() * 9000)}`;
   }
 
-  const codNorm = String(codigo).trim().toUpperCase();
+  const codNorm = String(codigo).trim().toUpperCase().replace(/\s+/g, '-');
   const jaExiste = (db.codigosConvite || []).some(c => c.codigo.toUpperCase() === codNorm);
   if (jaExiste) {
-    return res.status(400).json({ success: false, message: `O código "${codNorm}" já existe.` });
+    return res.status(400).json({ success: false, message: `O código ou link "${codNorm}" já existe no sistema.` });
   }
 
   const novoConvite = {
     codigo: codNorm,
-    descricao: descricao || 'Código gerado pelo administrador',
+    descricao: descricao || 'Link de convite gerado pelo administrador',
     maxUsos: Number(maxUsos) || 50,
-    isAdmin: false, // Novos códigos criados para clientes são sempre produtores normais
+    isAdmin: false, // Novos convites para clientes são sempre produtores normais
     usadoPor: [],
     ativo: true,
     criadoEm: new Date().toISOString()
@@ -814,11 +834,42 @@ app.post('/api/convites', autenticarUsuario, exigirAdmin, (req, res) => {
   db.codigosConvite.push(novoConvite);
   writeDb(db);
 
+  const host = req.get('host');
+  const protocol = req.protocol;
+  const baseUrl = `${protocol}://${host}`;
+  const linkCompleto = `${baseUrl}/?convite=${encodeURIComponent(codNorm)}`;
+
   res.status(201).json({
     success: true,
-    message: `Código de convite ${codNorm} criado com sucesso!`,
-    convite: novoConvite
+    message: `Link de convite com código ${codNorm} gerado com sucesso!`,
+    convite: {
+      ...novoConvite,
+      linkCompleto,
+      totalUsos: 0,
+      vagasRestantes: novoConvite.maxUsos
+    }
   });
+});
+
+// Excluir código de convite (SOMENTE ADMINISTRADOR)
+app.delete('/api/convites/:codigo', autenticarUsuario, exigirAdmin, (req, res) => {
+  const db = readDb();
+  const codParam = String(req.params.codigo).trim().toUpperCase();
+
+  // Não permitir excluir o código master de recuperação
+  if (codParam === 'ADMIN-MESTRE-2026') {
+    return res.status(400).json({ success: false, message: 'O código ADMIN-MESTRE-2026 não pode ser excluído.' });
+  }
+
+  const idx = (db.codigosConvite || []).findIndex(c => c.codigo.toUpperCase() === codParam);
+  if (idx === -1) {
+    return res.status(404).json({ success: false, message: 'Código de convite não encontrado.' });
+  }
+
+  db.codigosConvite.splice(idx, 1);
+  writeDb(db);
+
+  res.json({ success: true, message: `Código de convite ${codParam} removido com sucesso!` });
 });
 
 
@@ -831,7 +882,17 @@ app.get('/api/lotes', autenticarUsuario, (req, res) => {
   const db = readDb();
   const lotesDoUsuario = (db.lotes || []).filter(l => l.usuarioId === req.usuarioId);
   const lotesCalculados = lotesDoUsuario.map(calcularIndicadoresLote);
-  res.json({ success: true, lotes: lotesCalculados, usuario: req.usuario ? { id: req.usuario.id, nome: req.usuario.nome } : null });
+  const ehAdmin = ehUsuarioAdmin(req.usuario);
+  res.json({
+    success: true,
+    lotes: lotesCalculados,
+    usuario: req.usuario ? {
+      id: req.usuario.id,
+      nome: req.usuario.nome,
+      email: req.usuario.email,
+      role: ehAdmin ? 'admin' : (req.usuario.role || 'produtor')
+    } : null
+  });
 });
 
 // Obter um lote específico por ID
