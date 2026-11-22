@@ -200,8 +200,37 @@ function verificarSenha(senha, hashSalvo) {
   return hashOriginal === hashTentativa;
 }
 
-function gerarToken() {
-  return crypto.randomBytes(32).toString('hex');
+const JWT_SECRET = process.env.JWT_SECRET || 'agrolote_secret_salt_2026_master_key';
+
+function gerarToken(usuarioId = 'usr-admin-master') {
+  const timestamp = Date.now();
+  const payload = `${usuarioId}:${timestamp}`;
+  const hmac = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex');
+  return `agl_${Buffer.from(payload).toString('base64url')}.${hmac}`;
+}
+
+function extrairUsuarioIdDoToken(token, db) {
+  if (!token) return null;
+  // 1. Suporte a tokens em db.sessoes
+  if (db && db.sessoes && db.sessoes[token]) {
+    return db.sessoes[token];
+  }
+  // 2. Suporte a tokens autovalidáveis com HMAC
+  if (typeof token === 'string' && token.startsWith('agl_')) {
+    const parts = token.substring(4).split('.');
+    if (parts.length === 2) {
+      const [payloadB64, hmacRecebido] = parts;
+      try {
+        const payload = Buffer.from(payloadB64, 'base64url').toString('utf-8');
+        const hmacEsperado = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex');
+        if (hmacRecebido === hmacEsperado) {
+          const [usuarioId] = payload.split(':');
+          return usuarioId;
+        }
+      } catch (e) {}
+    }
+  }
+  return null;
 }
 
 // Criar lote inicial personalizado de boas-vindas para o novo usuário
@@ -425,12 +454,8 @@ function autenticarUsuario(req, res, next) {
   }
 
   const db = readDb();
-  let usuarioId = null;
+  let usuarioId = extrairUsuarioIdDoToken(token, db);
   let isVisitante = false;
-
-  if (token && db.sessoes && db.sessoes[token]) {
-    usuarioId = db.sessoes[token];
-  }
 
   // Fallback para visitante ou acesso direto (modo demonstração)
   if (!usuarioId) {
@@ -469,7 +494,8 @@ function exigirAdmin(req, res, next) {
   if (req.isVisitante || !ehUsuarioAdmin(req.usuario)) {
     return res.status(403).json({
       success: false,
-      message: "Acesso Restrito: Apenas o Administrador do sistema tem permissão para visualizar e gerar links e códigos de convite."
+      precisaLogin: true,
+      message: "Acesso Restrito: Apenas o Administrador do sistema tem permissão para visualizar e gerar links de convite. Se sua sessão expirou, faça login novamente com admin@agrolote.com."
     });
   }
   next();
@@ -691,7 +717,7 @@ app.post('/api/auth/cadastro', (req, res) => {
   db.lotes.push(primeiroLote);
 
   // Gerar sessão
-  const token = gerarToken();
+  const token = gerarToken(novoUsuario.id);
   db.sessoes[token] = novoUsuario.id;
 
   writeDb(db);
@@ -725,7 +751,7 @@ app.post('/api/auth/login', (req, res) => {
     return res.status(401).json({ success: false, message: 'E-mail ou senha incorretos.' });
   }
 
-  const token = gerarToken();
+  const token = gerarToken(usuario.id);
   db.sessoes[token] = usuario.id;
 
   const ehAdmin = ehUsuarioAdmin(usuario);
@@ -782,26 +808,65 @@ app.post('/api/auth/logout', (req, res) => {
 // ROTAS DE CÓDIGOS E LINKS DE CONVITE (GERENCIAMENTO ADMIN)
 // ==========================================
 
-// Listar links e códigos de convite disponíveis (SOMENTE ADMINISTRADOR)
+// Listar links e códigos de convite com detalhes de quem resgatou (SOMENTE ADMINISTRADOR)
 app.get('/api/convites', autenticarUsuario, exigirAdmin, (req, res) => {
   const db = readDb();
   const host = req.get('host');
   const protocol = req.protocol;
   const baseUrl = `${protocol}://${host}`;
 
-  const lista = (db.codigosConvite || []).map(c => ({
-    codigo: c.codigo,
-    linkCompleto: `${baseUrl}/?convite=${encodeURIComponent(c.codigo)}`,
-    descricao: c.descricao,
-    ativo: c.ativo !== false,
-    isAdmin: !!c.isAdmin,
-    maxUsos: c.maxUsos || 999,
-    totalUsos: (c.usadoPor || []).length,
-    vagasRestantes: Math.max(0, (c.maxUsos || 999) - (c.usadoPor || []).length),
-    usadoPor: (c.usadoPor || []).map(u => ({ nome: u.nome, email: u.email, usadoEm: u.usadoEm })),
-    criadoEm: c.criadoEm
-  }));
+  const lista = (db.codigosConvite || []).map(c => {
+    // Buscar no db.usuarios todos os usuários cadastrados com este código
+    const usuariosDoCodigo = (db.usuarios || []).filter(u => 
+      u.codigoConviteUtilizado && 
+      String(u.codigoConviteUtilizado).trim().toUpperCase() === String(c.codigo).trim().toUpperCase()
+    );
+
+    // Combinar com c.usadoPor sem duplicar e-mails
+    const listaUsuarios = [...(c.usadoPor || [])];
+    usuariosDoCodigo.forEach(u => {
+      if (!listaUsuarios.some(item => item.email && item.email.toLowerCase() === u.email.toLowerCase())) {
+        listaUsuarios.push({
+          usuarioId: u.id,
+          nome: u.nome,
+          email: u.email,
+          usadoEm: u.criadoEm || c.criadoEm
+        });
+      }
+    });
+
+    return {
+      codigo: c.codigo,
+      linkCompleto: `${baseUrl}/?convite=${encodeURIComponent(c.codigo)}`,
+      descricao: c.descricao,
+      ativo: c.ativo !== false,
+      isAdmin: !!c.isAdmin,
+      maxUsos: c.maxUsos || 999,
+      totalUsos: listaUsuarios.length,
+      vagasRestantes: Math.max(0, (c.maxUsos || 999) - listaUsuarios.length),
+      usadoPor: listaUsuarios,
+      criadoEm: c.criadoEm
+    };
+  });
   res.json({ success: true, convites: lista });
+});
+
+// Listar todos os usuários cadastrados no sistema (SOMENTE ADMINISTRADOR)
+app.get('/api/admin/usuarios', autenticarUsuario, exigirAdmin, (req, res) => {
+  const db = readDb();
+  const usuarios = (db.usuarios || []).map(u => {
+    const qtdLotes = (db.lotes || []).filter(l => l.usuarioId === u.id).length;
+    return {
+      id: u.id,
+      nome: u.nome,
+      email: u.email,
+      role: u.role || 'produtor',
+      codigoConviteUtilizado: u.codigoConviteUtilizado || 'Cadastro Livre (Sem Código)',
+      criadoEm: u.criadoEm || 'N/A',
+      qtdLotes
+    };
+  });
+  res.json({ success: true, total: usuarios.length, usuarios });
 });
 
 // Criar novo código e link de convite (SOMENTE ADMINISTRADOR)
