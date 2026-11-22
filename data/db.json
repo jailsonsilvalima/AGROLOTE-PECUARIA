@@ -880,9 +880,113 @@
           "obs": "Animal #6"
         }
       ]
+    },
+    {
+      "id": "lote-1795367511187",
+      "usuarioId": "usr-1795367511185",
+      "nome": "Lote 01 - Meus Bovinos de Corte",
+      "categoria": "bovino",
+      "icone": "🐂",
+      "especie": "Bovinos (Gado de Corte)",
+      "racaPredominante": "Nelore / Sertanejo",
+      "qtdAnimais": 6,
+      "dataEntrada": "2026-11-22",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-02-20",
+      "status": "ativo",
+      "compraPorCabeca": 2600,
+      "freteEntrada": 400,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "cabeca",
+      "vendaPorCabecaEstimada": 4450,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 510,
+      "rendimentoCarcaçaPct": 54,
+      "precoArroba": 245,
+      "precoKgVivo": 11,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 0,
+      "despesas": [
+        {
+          "id": "d-1",
+          "tipo": "racao",
+          "data": "2026-11-22",
+          "descricao": "Ração de Adaptação (14% PB)",
+          "qtd": 10,
+          "unidade": "Sacos 40kg",
+          "valorUnitario": 75,
+          "valorTotal": 750,
+          "obs": "Início do lote"
+        },
+        {
+          "id": "d-2",
+          "tipo": "medicamento",
+          "data": "2026-11-22",
+          "descricao": "Vacina Clostridiose + Vermífugo",
+          "qtd": 6,
+          "unidade": "doses",
+          "valorUnitario": 12,
+          "valorTotal": 72,
+          "obs": "Protocolo sanitário inicial"
+        }
+      ],
+      "animais": [
+        {
+          "brinco": "BOV-01",
+          "raca": "Nelore",
+          "pesoEntradaKg": 360,
+          "pesoAbateKg": 520,
+          "obs": "Animal #1"
+        },
+        {
+          "brinco": "BOV-02",
+          "raca": "Nelore",
+          "pesoEntradaKg": 370,
+          "pesoAbateKg": 535,
+          "obs": "Animal #2"
+        },
+        {
+          "brinco": "BOV-03",
+          "raca": "Guzerá",
+          "pesoEntradaKg": 350,
+          "pesoAbateKg": 505,
+          "obs": "Animal #3"
+        },
+        {
+          "brinco": "BOV-04",
+          "raca": "Nelore",
+          "pesoEntradaKg": 380,
+          "pesoAbateKg": 540,
+          "obs": "Animal #4"
+        },
+        {
+          "brinco": "BOV-05",
+          "raca": "Mestiço",
+          "pesoEntradaKg": 345,
+          "pesoAbateKg": 495,
+          "obs": "Animal #5"
+        },
+        {
+          "brinco": "BOV-06",
+          "raca": "Nelore",
+          "pesoEntradaKg": 365,
+          "pesoAbateKg": 525,
+          "obs": "Animal #6"
+        }
+      ]
     }
   ],
   "usuarios": [
+    {
+      "id": "usr-admin-master",
+      "nome": "Administrador Master",
+      "email": "admin@agrolote.com",
+      "senhaHash": "60a00ad38777c7ad1277d7680c4bd250:21be79b141585687ecf782bccd8367973256e699052d1835db0650bbfff0572a97505d0b8388fb741d792651aa6a5280f5565e18d46710dd823d914fcde6dc19",
+      "role": "admin",
+      "codigoConviteUtilizado": "ADMIN-MESTRE-2026",
+      "criadoEm": "2026-11-22T17:12:06.657Z"
+    },
     {
       "id": "usr-demo",
       "nome": "Produtor Demonstração",
@@ -944,6 +1048,15 @@
       "role": "admin",
       "codigoConviteUtilizado": "ADMIN-MESTRE-2026",
       "criadoEm": "2026-11-22T17:06:31.372Z"
+    },
+    {
+      "id": "usr-1795367511185",
+      "nome": "Produtor Sem Codigo",
+      "email": "produtor_sem_codigo_1795367511124@teste.com",
+      "senhaHash": "2c6e539c717e31271a23033084886776:d9f2d50a785776e475b186d2dad33762af0b78651907f53b362e0f00c2177536eedefc40405f136e91c013ff76cffe74b4844a85187c66056061c554aee4dfd7",
+      "role": "produtor",
+      "codigoConviteUtilizado": null,
+      "criadoEm": "2026-11-22T17:11:51.186Z"
     }
   ],
   "sessoes": {
@@ -952,7 +1065,9 @@
     "19457de4b251672754dd0397cdc009a8b5f034a2683bb298019097142db86992": "usr-1795364042641",
     "51b2f25f551cd68ef13060854f23849da2a9c60c48c3c09ff5dab270fd18fb71": "usr-1795364240860",
     "8e2c10bce241f97e038c8f680bdbc552c575051cadf2d77f766d7caf891861e9": "usr-1795367191359",
-    "c2b1d9887336c403bc01c86ba86e41c9e6e421cec45dd249f02051adde9e8651": "usr-1795367191371"
+    "c2b1d9887336c403bc01c86ba86e41c9e6e421cec45dd249f02051adde9e8651": "usr-1795367191371",
+    "5fb6c0c06ae953fdb41388d3ed0346cad0c844c83633fed7a1c3ccea08a878b8": "usr-1795367511185",
+    "693818604780406dfe22faba149b1ddde176a62584eb5b9e3722c7677516f337": "usr-admin-master"
   },
   "codigosConvite": [
     {
