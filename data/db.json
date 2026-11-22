@@ -1,0 +1,803 @@
+{
+  "lotes": [
+    {
+      "id": "lote-01",
+      "nome": "Lote 01 - 5 Garrotes Nelore em Confinamento",
+      "categoria": "bovino",
+      "icone": "🐂",
+      "especie": "Bovinos (Gado de Corte)",
+      "racaPredominante": "Nelore / Mestiço Sertanejo",
+      "qtdAnimais": 5,
+      "dataEntrada": "2026-10-08",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-01-06",
+      "status": "ativo",
+      "compraPorCabeca": 2550,
+      "freteEntrada": 400,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "arroba",
+      "vendaPorCabecaEstimada": 4553.28,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 510,
+      "rendimentoCarcaçaPct": 54,
+      "precoArroba": 248,
+      "precoKgVivo": 13.5,
+      "precoKgCarcaca": 25,
+      "freteAbate": 350,
+      "valorTotalVendaReal": 0,
+      "usuarioId": "usr-demo",
+      "despesas": [
+        {
+          "id": "d-1",
+          "tipo": "racao",
+          "data": "2026-10-08",
+          "descricao": "Ração Concentrada 16% PB (Adaptação Inicial)",
+          "qtd": 10,
+          "unidade": "Sacos 40kg",
+          "valorUnitario": 82,
+          "valorTotal": 820,
+          "obs": "Adaptação de cocho nos primeiros 15 dias"
+        },
+        {
+          "id": "d-2",
+          "tipo": "racao",
+          "data": "2026-10-18",
+          "descricao": "Silagem de Milho com Grão (Volumoso Nobre)",
+          "qtd": 5,
+          "unidade": "Toneladas",
+          "valorUnitario": 250,
+          "valorTotal": 1250,
+          "obs": "Silagem de alta densidade energética"
+        },
+        {
+          "id": "d-3",
+          "tipo": "racao",
+          "data": "2026-10-28",
+          "descricao": "Ração Concentrada Engorda e Acabamento 18% PB",
+          "qtd": 35,
+          "unidade": "Sacos 40kg",
+          "valorUnitario": 88,
+          "valorTotal": 3080,
+          "obs": "Milho moído + Farelo de soja 46%"
+        },
+        {
+          "id": "d-4",
+          "tipo": "racao",
+          "data": "2026-11-02",
+          "descricao": "Núcleo Mineral com Virginiamicina e Monensina",
+          "qtd": 2,
+          "unidade": "Sacos 25kg",
+          "valorUnitario": 145,
+          "valorTotal": 290,
+          "obs": "Aditivo promotor de crescimento e ganho de carcaça"
+        },
+        {
+          "id": "d-5",
+          "tipo": "medicamento",
+          "data": "2026-10-08",
+          "descricao": "Protocolo Sanitário na Chegada (Clostridiose + Raiva)",
+          "qtd": 5,
+          "unidade": "doses",
+          "valorUnitario": 4.5,
+          "valorTotal": 22.5,
+          "obs": "Imunização completa na entrada"
+        },
+        {
+          "id": "d-6",
+          "tipo": "medicamento",
+          "data": "2026-10-08",
+          "descricao": "Endectocida Injetável Concentrado 3.15%",
+          "qtd": 1,
+          "unidade": "frasco 50ml",
+          "valorUnitario": 65,
+          "valorTotal": 65,
+          "obs": "Controle de parasitas internos e externos"
+        },
+        {
+          "id": "d-7",
+          "tipo": "medicamento",
+          "data": "2026-10-13",
+          "descricao": "Modificador Orgânico + Complexo Vitamínico ADE",
+          "qtd": 5,
+          "unidade": "doses",
+          "valorUnitario": 16,
+          "valorTotal": 80,
+          "obs": "Estímulo metabólico para ganho de peso acelerado"
+        }
+      ],
+      "animais": [
+        {
+          "brinco": "BR-01",
+          "raca": "Nelore",
+          "pesoEntradaKg": 360,
+          "pesoAbateKg": 520,
+          "obs": "Ganho excelente (+160 kg)"
+        },
+        {
+          "brinco": "BR-02",
+          "raca": "Nelore x Guzerá",
+          "pesoEntradaKg": 365,
+          "pesoAbateKg": 530,
+          "obs": "Muito vigoroso (+165 kg)"
+        },
+        {
+          "brinco": "BR-03",
+          "raca": "Mestiço Sertanejo",
+          "pesoEntradaKg": 350,
+          "pesoAbateKg": 495,
+          "obs": "Uniforme e rústico (+145 kg)"
+        },
+        {
+          "brinco": "BR-04",
+          "raca": "Nelore Mocho",
+          "pesoEntradaKg": 370,
+          "pesoAbateKg": 525,
+          "obs": "Carcaça convexa (+155 kg)"
+        },
+        {
+          "brinco": "BR-05",
+          "raca": "Sindi x Nelore",
+          "pesoEntradaKg": 355,
+          "pesoAbateKg": 500,
+          "obs": "Precoce e bem acabado (+145 kg)"
+        }
+      ]
+    },
+    {
+      "id": "lote-1795360009633",
+      "nome": "LOTE 1",
+      "especie": "Bovinos de Corte",
+      "qtdAnimais": 10,
+      "dataEntrada": "2026-11-22",
+      "diasCiclo": 120,
+      "dataPrevistaAbate": "2027-03-22",
+      "status": "finalizado",
+      "compraPorCabeca": 150,
+      "freteEntrada": 0,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "cabeca",
+      "vendaPorCabecaEstimada": 4400,
+      "vendaRealizada": true,
+      "pesoVivoMedioKg": 500,
+      "rendimentoCarcaçaPct": 54,
+      "precoArroba": 240,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 5000,
+      "despesas": [],
+      "animais": [],
+      "dataAbateReal": "2026-11-22",
+      "categoria": "bovino",
+      "icone": "🐂",
+      "usuarioId": "usr-demo"
+    },
+    {
+      "id": "lote-02",
+      "nome": "Lote 02 - 10 Porcos Caipiras / Engorda",
+      "categoria": "suino",
+      "icone": "🐖",
+      "especie": "Suínos (Porcos de Engorda)",
+      "racaPredominante": "Porco Caipira / Moura x Piau",
+      "qtdAnimais": 10,
+      "dataEntrada": "2026-10-25",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-01-23",
+      "status": "ativo",
+      "compraPorCabeca": 280,
+      "freteEntrada": 150,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "kg_vivo",
+      "vendaPorCabecaEstimada": 1100,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 105,
+      "rendimentoCarcaçaPct": 74,
+      "precoKgVivo": 10.5,
+      "precoKgCarcaca": 15,
+      "freteAbate": 180,
+      "valorTotalVendaReal": 0,
+      "despesas": [
+        {
+          "id": "ds-1",
+          "tipo": "racao",
+          "data": "2026-10-25",
+          "descricao": "Ração Crescimento Suínos 18%",
+          "qtd": 8,
+          "unidade": "Sacos 50kg",
+          "valorUnitario": 88,
+          "valorTotal": 704,
+          "obs": "Início da engorda dos 10 leitões"
+        },
+        {
+          "id": "ds-2",
+          "tipo": "racao",
+          "data": "2026-11-10",
+          "descricao": "Milho Moído e Farelo de Trigo",
+          "qtd": 12,
+          "unidade": "Sacos 50kg",
+          "valorUnitario": 65,
+          "valorTotal": 780,
+          "obs": "Mistura com soro"
+        },
+        {
+          "id": "ds-3",
+          "tipo": "medicamento",
+          "data": "2026-10-25",
+          "descricao": "Vermífugo Ivermectina Injetável",
+          "qtd": 1,
+          "unidade": "frasco 50ml",
+          "valorUnitario": 45,
+          "valorTotal": 45,
+          "obs": "Desverminação na chegada"
+        },
+        {
+          "id": "ds-4",
+          "tipo": "medicamento",
+          "data": "2026-10-27",
+          "descricao": "Ferro Dextrano + Complexo B",
+          "qtd": 10,
+          "unidade": "doses",
+          "valorUnitario": 4,
+          "valorTotal": 40,
+          "obs": "Reforço imunológico"
+        }
+      ],
+      "animais": [
+        {
+          "brinco": "SU-01",
+          "raca": "Moura x Piau",
+          "pesoEntradaKg": 24,
+          "pesoAbateKg": 104,
+          "obs": "Ótimo ganho"
+        },
+        {
+          "brinco": "SU-02",
+          "raca": "Caipira Canastra",
+          "pesoEntradaKg": 26,
+          "pesoAbateKg": 108,
+          "obs": "Carne saborosa"
+        },
+        {
+          "brinco": "SU-03",
+          "raca": "Híbrido",
+          "pesoEntradaKg": 27,
+          "pesoAbateKg": 112,
+          "obs": "Muito precoce"
+        }
+      ],
+      "usuarioId": "usr-demo"
+    },
+    {
+      "id": "lote-03",
+      "nome": "Lote 03 - 15 Carneiros Santa Inês",
+      "categoria": "ovino",
+      "icone": "🐑",
+      "especie": "Ovinos (Carneiros / Cordeiros)",
+      "racaPredominante": "Santa Inês Puro e Mestiço",
+      "qtdAnimais": 15,
+      "dataEntrada": "2026-11-01",
+      "diasCiclo": 75,
+      "dataPrevistaAbate": "2027-01-15",
+      "status": "ativo",
+      "compraPorCabeca": 220,
+      "freteEntrada": 180,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "cabeca",
+      "vendaPorCabecaEstimada": 540,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 40,
+      "rendimentoCarcaçaPct": 48,
+      "precoKgVivo": 13.5,
+      "precoKgCarcaca": 28,
+      "freteAbate": 150,
+      "valorTotalVendaReal": 0,
+      "despesas": [
+        {
+          "id": "do-1",
+          "tipo": "racao",
+          "data": "2026-11-01",
+          "descricao": "Ração Concentrada Ovinos",
+          "qtd": 10,
+          "unidade": "Sacos 40kg",
+          "valorUnitario": 75,
+          "valorTotal": 750,
+          "obs": "Concentrado 16% proteína"
+        },
+        {
+          "id": "do-2",
+          "tipo": "racao",
+          "data": "2026-11-10",
+          "descricao": "Palma Forrageira + Feno Tifton",
+          "qtd": 25,
+          "unidade": "Fardos",
+          "valorUnitario": 22,
+          "valorTotal": 550,
+          "obs": "Palma picada no cocho"
+        },
+        {
+          "id": "do-3",
+          "tipo": "medicamento",
+          "data": "2026-11-01",
+          "descricao": "Vermífugo Oral Ovinos",
+          "qtd": 1,
+          "unidade": "frasco 250ml",
+          "valorUnitario": 58,
+          "valorTotal": 58,
+          "obs": "Controle de vermes"
+        },
+        {
+          "id": "do-4",
+          "tipo": "medicamento",
+          "data": "2026-11-02",
+          "descricao": "Vacina Clostridiose Ovina",
+          "qtd": 15,
+          "unidade": "doses",
+          "valorUnitario": 3.5,
+          "valorTotal": 52.5,
+          "obs": "Proteção sanitária"
+        }
+      ],
+      "animais": [
+        {
+          "brinco": "OV-01",
+          "raca": "Santa Inês Vermelho",
+          "pesoEntradaKg": 19,
+          "pesoAbateKg": 42,
+          "obs": "Excelente acabamento"
+        },
+        {
+          "brinco": "OV-02",
+          "raca": "Santa Inês Preto",
+          "pesoEntradaKg": 18,
+          "pesoAbateKg": 40,
+          "obs": "Carcaça limpa"
+        },
+        {
+          "brinco": "OV-03",
+          "raca": "Morada Nova",
+          "pesoEntradaKg": 17,
+          "pesoAbateKg": 38,
+          "obs": "Rústico do sertão"
+        }
+      ],
+      "usuarioId": "usr-demo"
+    },
+    {
+      "id": "lote-1795363341634",
+      "usuarioId": "usr-1795363341633",
+      "nome": "Lote 01 - Meus Carneiros Santa Inês",
+      "categoria": "ovino",
+      "icone": "🐑",
+      "especie": "Ovinos (Carneiros)",
+      "racaPredominante": "Santa Inês Puro e Mestiço",
+      "qtdAnimais": 15,
+      "dataEntrada": "2026-11-22",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-02-20",
+      "status": "ativo",
+      "compraPorCabeca": 220,
+      "freteEntrada": 180,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "cabeca",
+      "vendaPorCabecaEstimada": 540,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 40,
+      "rendimentoCarcaçaPct": 48,
+      "precoArroba": 245,
+      "precoKgVivo": 11,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 0,
+      "despesas": [],
+      "animais": []
+    },
+    {
+      "id": "lote-1795363547944",
+      "usuarioId": "usr-1795363547944",
+      "nome": "Lote 01 - Meus Suínos de Engorda",
+      "categoria": "suino",
+      "icone": "🐖",
+      "especie": "Suínos (Porcos de Engorda)",
+      "racaPredominante": "Porco Caipira / Moura",
+      "qtdAnimais": 10,
+      "dataEntrada": "2026-11-22",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-02-20",
+      "status": "ativo",
+      "compraPorCabeca": 280,
+      "freteEntrada": 150,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "kg_vivo",
+      "vendaPorCabecaEstimada": 1155,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 105,
+      "rendimentoCarcaçaPct": 74,
+      "precoArroba": 245,
+      "precoKgVivo": 11,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 0,
+      "despesas": [
+        {
+          "id": "ds-1",
+          "tipo": "racao",
+          "data": "2026-11-22",
+          "descricao": "Ração Crescimento Suínos",
+          "qtd": 8,
+          "unidade": "Sacos 50kg",
+          "valorUnitario": 85,
+          "valorTotal": 680,
+          "obs": "Adaptação dos leitões"
+        },
+        {
+          "id": "d-1795363547954",
+          "tipo": "racao",
+          "data": "2026-11-22",
+          "descricao": "Farelo de Soja Especial 46% PB",
+          "qtd": 5,
+          "unidade": "Sacos 50kg",
+          "valorUnitario": 110,
+          "valorTotal": 550,
+          "obs": ""
+        }
+      ],
+      "animais": []
+    },
+    {
+      "id": "lote-1795363782740",
+      "usuarioId": "usr-1795363782740",
+      "nome": "Lote 01 - Meus Bovinos de Corte",
+      "categoria": "bovino",
+      "icone": "🐂",
+      "especie": "Bovinos (Gado de Corte)",
+      "racaPredominante": "Nelore / Sertanejo",
+      "qtdAnimais": 6,
+      "dataEntrada": "2026-11-22",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-02-20",
+      "status": "ativo",
+      "compraPorCabeca": 2600,
+      "freteEntrada": 400,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "cabeca",
+      "vendaPorCabecaEstimada": 4450,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 510,
+      "rendimentoCarcaçaPct": 54,
+      "precoArroba": 245,
+      "precoKgVivo": 11,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 0,
+      "despesas": [
+        {
+          "id": "d-1",
+          "tipo": "racao",
+          "data": "2026-11-22",
+          "descricao": "Ração de Adaptação (14% PB)",
+          "qtd": 10,
+          "unidade": "Sacos 40kg",
+          "valorUnitario": 75,
+          "valorTotal": 750,
+          "obs": "Início do lote"
+        },
+        {
+          "id": "d-2",
+          "tipo": "medicamento",
+          "data": "2026-11-22",
+          "descricao": "Vacina Clostridiose + Vermífugo",
+          "qtd": 6,
+          "unidade": "doses",
+          "valorUnitario": 12,
+          "valorTotal": 72,
+          "obs": "Protocolo sanitário inicial"
+        }
+      ],
+      "animais": [
+        {
+          "brinco": "BOV-01",
+          "raca": "Nelore",
+          "pesoEntradaKg": 360,
+          "pesoAbateKg": 520,
+          "obs": "Animal #1"
+        },
+        {
+          "brinco": "BOV-02",
+          "raca": "Nelore",
+          "pesoEntradaKg": 370,
+          "pesoAbateKg": 535,
+          "obs": "Animal #2"
+        },
+        {
+          "brinco": "BOV-03",
+          "raca": "Guzerá",
+          "pesoEntradaKg": 350,
+          "pesoAbateKg": 505,
+          "obs": "Animal #3"
+        },
+        {
+          "brinco": "BOV-04",
+          "raca": "Nelore",
+          "pesoEntradaKg": 380,
+          "pesoAbateKg": 540,
+          "obs": "Animal #4"
+        },
+        {
+          "brinco": "BOV-05",
+          "raca": "Mestiço",
+          "pesoEntradaKg": 345,
+          "pesoAbateKg": 495,
+          "obs": "Animal #5"
+        },
+        {
+          "brinco": "BOV-06",
+          "raca": "Nelore",
+          "pesoEntradaKg": 365,
+          "pesoAbateKg": 525,
+          "obs": "Animal #6"
+        }
+      ]
+    },
+    {
+      "id": "lote-1795364042642",
+      "usuarioId": "usr-1795364042641",
+      "nome": "Lote 01 - Meus Bodes Moxotó",
+      "categoria": "caprino",
+      "icone": "🐐",
+      "especie": "Caprinos (Bodes)",
+      "racaPredominante": "Moxotó / SRD",
+      "qtdAnimais": 12,
+      "dataEntrada": "2026-11-22",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-02-20",
+      "status": "ativo",
+      "compraPorCabeca": 190,
+      "freteEntrada": 120,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "cabeca",
+      "vendaPorCabecaEstimada": 480,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 35,
+      "rendimentoCarcaçaPct": 46,
+      "precoArroba": 245,
+      "precoKgVivo": 11,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 0,
+      "despesas": [],
+      "animais": []
+    },
+    {
+      "id": "lote-1795364042646",
+      "usuarioId": "usr-1795364042641",
+      "nome": "Meus Bodes do Sertão",
+      "categoria": "caprino",
+      "icone": "🐐",
+      "especie": "Caprinos (Bodes)",
+      "racaPredominante": "",
+      "qtdAnimais": 15,
+      "dataEntrada": "2026-11-22",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 120,
+      "dataPrevistaAbate": "2027-03-22",
+      "status": "ativo",
+      "compraPorCabeca": 0,
+      "freteEntrada": 0,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "kg_vivo",
+      "vendaPorCabecaEstimada": 0,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 35,
+      "rendimentoCarcaçaPct": 46,
+      "precoArroba": 245,
+      "precoKgVivo": 11,
+      "precoKgCarcaca": 20,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 0,
+      "despesas": [],
+      "animais": []
+    },
+    {
+      "id": "lote-1795364240860",
+      "usuarioId": "usr-1795364240860",
+      "nome": "Lote 01 - Meus Bovinos de Corte",
+      "categoria": "bovino",
+      "icone": "🐂",
+      "especie": "Bovinos (Gado de Corte)",
+      "racaPredominante": "Nelore / Sertanejo",
+      "qtdAnimais": 6,
+      "dataEntrada": "2026-11-22",
+      "modalidadeCiclo": "corrido",
+      "diasCiclo": 90,
+      "dataPrevistaAbate": "2027-02-20",
+      "status": "ativo",
+      "compraPorCabeca": 2600,
+      "freteEntrada": 400,
+      "outrosCustosAquisicao": 0,
+      "modoVenda": "cabeca",
+      "vendaPorCabecaEstimada": 4450,
+      "vendaRealizada": false,
+      "pesoVivoMedioKg": 510,
+      "rendimentoCarcaçaPct": 54,
+      "precoArroba": 245,
+      "precoKgVivo": 11,
+      "freteAbate": 0,
+      "valorTotalVendaReal": 0,
+      "despesas": [
+        {
+          "id": "d-1",
+          "tipo": "racao",
+          "data": "2026-11-22",
+          "descricao": "Ração de Adaptação (14% PB)",
+          "qtd": 10,
+          "unidade": "Sacos 40kg",
+          "valorUnitario": 75,
+          "valorTotal": 750,
+          "obs": "Início do lote"
+        },
+        {
+          "id": "d-2",
+          "tipo": "medicamento",
+          "data": "2026-11-22",
+          "descricao": "Vacina Clostridiose + Vermífugo",
+          "qtd": 6,
+          "unidade": "doses",
+          "valorUnitario": 12,
+          "valorTotal": 72,
+          "obs": "Protocolo sanitário inicial"
+        }
+      ],
+      "animais": [
+        {
+          "brinco": "BOV-01",
+          "raca": "Nelore",
+          "pesoEntradaKg": 360,
+          "pesoAbateKg": 520,
+          "obs": "Animal #1"
+        },
+        {
+          "brinco": "BOV-02",
+          "raca": "Nelore",
+          "pesoEntradaKg": 370,
+          "pesoAbateKg": 535,
+          "obs": "Animal #2"
+        },
+        {
+          "brinco": "BOV-03",
+          "raca": "Guzerá",
+          "pesoEntradaKg": 350,
+          "pesoAbateKg": 505,
+          "obs": "Animal #3"
+        },
+        {
+          "brinco": "BOV-04",
+          "raca": "Nelore",
+          "pesoEntradaKg": 380,
+          "pesoAbateKg": 540,
+          "obs": "Animal #4"
+        },
+        {
+          "brinco": "BOV-05",
+          "raca": "Mestiço",
+          "pesoEntradaKg": 345,
+          "pesoAbateKg": 495,
+          "obs": "Animal #5"
+        },
+        {
+          "brinco": "BOV-06",
+          "raca": "Nelore",
+          "pesoEntradaKg": 365,
+          "pesoAbateKg": 525,
+          "obs": "Animal #6"
+        }
+      ]
+    }
+  ],
+  "usuarios": [
+    {
+      "id": "usr-demo",
+      "nome": "Produtor Demonstração",
+      "email": "demo@pecuaria.com",
+      "senhaHash": "d5219e760053734aac435209fd3e9128:1cb08362e703953a2728e0c8abb60a7d041657a9e5e4356fab164f5d2d44c4682caf568d762207813b1542dd7eb21f1bef637df5019acb30a7f0faf4e5c77a59",
+      "criadoEm": "2026-11-22T16:02:10.792Z"
+    },
+    {
+      "id": "usr-1795363341633",
+      "nome": "Fazenda Sertao Verde",
+      "email": "sertao@agro.com",
+      "senhaHash": "21de923b17e847442d5b355fc2d16361:45b82779da0793ac18fff70d037375ade8ac10072e89cada75a8142385bbbb434c1fea3d92d51b84bf9a9f694ff3bbd2b6a016fc6215ceab97d4c9a79996c38f",
+      "criadoEm": "2026-11-22T16:02:21.634Z"
+    },
+    {
+      "id": "usr-1795363547944",
+      "nome": "Lucas Produtor Suíno",
+      "email": "lucas_suino@agro.com",
+      "senhaHash": "9d2c5c626ac64bbf0dce0351e0042c00:046b3a7ac6313c5be9594d1d4fb821f5f3aad1eeff6f9bff5df8faddd41cb4dd64b6cee02280280832c0bc1f1db4a5c0f7dbf7792b48c5921e35db4584705e92",
+      "criadoEm": "2026-11-22T16:05:47.944Z"
+    },
+    {
+      "id": "usr-1795363782740",
+      "nome": "FDS",
+      "email": "fsfsf@gmail.com",
+      "senhaHash": "51a1aee37e8190122b201e5b20fcff55:39060381cfa93543bc0480271cce68e75f9715c2bb04cc31017b75aed2153573dd335a407a5a0756aaec3a68e92b6df6819ddce5d8f8b313299aa1168ecca848",
+      "criadoEm": "2026-11-22T16:09:42.740Z"
+    },
+    {
+      "id": "usr-1795364042641",
+      "nome": "Produtor Autorizado",
+      "email": "autorizado@teste.com",
+      "senhaHash": "7865aa25806e03d61f135d743deaf2ba:be59b7810037ab4dc5c43dff60efcdf67fb5e15e3d5738051f62fbaff6c90216f5a79f6481c70cf29094561380bbfb226a5d9e9393d08c26b6a5afeae4178f4d",
+      "codigoConviteUtilizado": "AGRO2026",
+      "criadoEm": "2026-11-22T16:14:02.642Z"
+    },
+    {
+      "id": "usr-1795364240860",
+      "nome": "José da Silva",
+      "email": "jose_bahia@agro.com",
+      "senhaHash": "ddae336b13e9c45c5be1bb4d12481d53:4dc320ce3263404d8135c279dafb8294183d0e6870c3050bd0cf8361811cccc12dc09780c06ce096136fd885ccbd28d2eb8b5be25821ac04fff8fdc6d16305e9",
+      "codigoConviteUtilizado": "AMIGO-ZE",
+      "criadoEm": "2026-11-22T16:17:20.860Z"
+    }
+  ],
+  "sessoes": {
+    "1d09d7f384c020e92045dbb0e347a627b8b6d525f65fd55856ff08e0f716ce54": "usr-1795363341633",
+    "06658ca9ce1d29159d46e92e0e5246cc7c045fb109c9367ad79c5bf4e767a4e6": "usr-1795363547944",
+    "19457de4b251672754dd0397cdc009a8b5f034a2683bb298019097142db86992": "usr-1795364042641",
+    "51b2f25f551cd68ef13060854f23849da2a9c60c48c3c09ff5dab270fd18fb71": "usr-1795364240860"
+  },
+  "codigosConvite": [
+    {
+      "codigo": "AGRO2026",
+      "descricao": "Código Padrão Agro 2026",
+      "maxUsos": 999,
+      "usadoPor": [
+        {
+          "usuarioId": "usr-1795364042641",
+          "nome": "Produtor Autorizado",
+          "email": "autorizado@teste.com",
+          "usadoEm": "2026-11-22T16:14:02.642Z"
+        }
+      ],
+      "ativo": true,
+      "criadoEm": "2026-11-22T16:14:02.629Z"
+    },
+    {
+      "codigo": "NORDESTE88",
+      "descricao": "Produtores da Região Nordeste",
+      "maxUsos": 100,
+      "usadoPor": [],
+      "ativo": true,
+      "criadoEm": "2026-11-22T16:14:02.629Z"
+    },
+    {
+      "codigo": "FAZENDA-VIP",
+      "descricao": "Convite Especial Fazenda VIP",
+      "maxUsos": 50,
+      "usadoPor": [],
+      "ativo": true,
+      "criadoEm": "2026-11-22T16:14:02.629Z"
+    },
+    {
+      "codigo": "CONVITE-LUCAS",
+      "descricao": "Código Pessoal do Administrador",
+      "maxUsos": 100,
+      "usadoPor": [],
+      "ativo": true,
+      "criadoEm": "2026-11-22T16:14:02.629Z"
+    },
+    {
+      "codigo": "AMIGO-ZE",
+      "descricao": "Para o José da Bahia",
+      "maxUsos": 10,
+      "usadoPor": [
+        {
+          "usuarioId": "usr-1795364240860",
+          "nome": "José da Silva",
+          "email": "jose_bahia@agro.com",
+          "usadoEm": "2026-11-22T16:17:20.860Z"
+        }
+      ],
+      "ativo": true,
+      "criadoEm": "2026-11-22T16:17:20.857Z"
+    }
+  ]
+}
