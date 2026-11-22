@@ -2,7 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#064e3b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>AgroLote - Contabilidade e Lucro de Lotes de Animais (Nordeste)</title>
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -27,16 +30,35 @@
     }
   </script>
   <style>
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
       margin: 0; 
     }
+    
+    /* Otimização de toque e zoom para Celulares e Tablets */
+    @media (max-width: 768px) {
+      input, select, textarea { 
+        font-size: 16px !important; /* Desativa zoom forçado no iPhone/Safari e Android */
+      }
+      .touch-target {
+        min-height: 44px;
+      }
+    }
+    
+    /* Suporte a barra inferior de gestos em celulares (iOS safe-area) */
+    .pb-safe {
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    }
+
     @media print {
-      nav, .no-print, button, #select-lote { display: none !important; }
+      nav, .no-print, button, #select-lote, #menu-mobile-drawer, .bottom-nav-mobile { display: none !important; }
       body { background: white !important; color: black !important; }
       .print-only { display: block !important; }
       main { max-width: 100% !important; padding: 0 !important; }
@@ -47,74 +69,160 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
 
-  <!-- NAVBAR SUPERIOR -->
+  <!-- NAVBAR SUPERIOR RESPONSIVA (CELULAR, TABLET E DESKTOP) -->
   <nav class="bg-emerald-900 text-white shadow-md sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14 sm:h-16">
         
         <!-- Logo e Título -->
-        <div class="flex items-center gap-3">
-          <div id="nav-animal-icone" class="w-10 h-10 rounded-xl bg-emerald-800/80 border border-emerald-500/40 flex items-center justify-center text-2xl shadow-inner transition-transform">
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div id="nav-animal-icone" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-800/80 border border-emerald-500/40 flex items-center justify-center text-xl sm:text-2xl shadow-inner transition-transform">
             🐂
           </div>
           <div>
-            <div class="font-bold text-lg leading-tight flex items-center gap-2">
+            <div class="font-bold text-base sm:text-lg leading-tight flex items-center gap-1.5 sm:gap-2">
               AgroLote
-              <span class="text-[10px] bg-emerald-500/30 text-emerald-300 font-semibold px-2 py-0.5 rounded-full border border-emerald-400/30 uppercase tracking-wide">
+              <span class="text-[9px] sm:text-[10px] bg-emerald-500/30 text-emerald-300 font-semibold px-1.5 sm:px-2 py-0.5 rounded-full border border-emerald-400/30 uppercase tracking-wide">
                 Nordeste
               </span>
             </div>
-            <p class="text-xs text-emerald-200">Gado, Porco, Carneiro, Bode & Aves</p>
+            <p class="text-[10px] sm:text-xs text-emerald-200 hidden xs:block sm:block">Gado, Porco, Ovinos & Caprinos</p>
           </div>
         </div>
 
-        <!-- Seletor de Lote e Ações -->
-        <div class="flex items-center gap-2 sm:gap-3">
-          <div class="relative">
-            <select id="select-lote" onchange="trocarLote(this.value)" class="bg-emerald-800 border border-emerald-600 text-white text-xs sm:text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 pr-8 font-medium">
+        <!-- Seletor de Lote Rápido (Visível em todos os aparelhos) -->
+        <div class="flex items-center gap-1.5 sm:gap-3">
+          <div class="relative max-w-[130px] xs:max-w-[160px] sm:max-w-xs">
+            <select id="select-lote" onchange="trocarLote(this.value)" class="w-full bg-emerald-800 border border-emerald-600 text-white text-xs sm:text-sm rounded-lg px-2 sm:px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 font-medium truncate">
               <!-- Preenchido via JS -->
             </select>
           </div>
 
-          <button onclick="abrirModalNovoLote()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm">
-            <span>+</span> <span class="hidden sm:inline">Novo Lote</span>
-          </button>
+          <!-- BOTÕES DESKTOP / TABLET (Ocultos no celular para não espremer) -->
+          <div class="hidden md:flex items-center gap-2">
+            <button onclick="abrirModalNovoLote()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm">
+              <span>+</span> <span>Novo Lote</span>
+            </button>
 
-          <a href="/api/backup" download="backup_pecuaria.json" title="Baixar Backup dos Meus Dados" class="p-1.5 text-emerald-200 hover:text-white rounded-lg hover:bg-emerald-800 text-sm transition-colors">
-            💾
-          </a>
+            <a href="/api/backup" download="backup_pecuaria.json" title="Baixar Backup dos Meus Dados" class="p-1.5 text-emerald-200 hover:text-white rounded-lg hover:bg-emerald-800 text-sm transition-colors">
+              💾
+            </a>
 
-          <!-- BOTÃO GERENCIAR CÓDIGOS DE CONVITE -->
-          <button onclick="abrirModalConvites()" title="Gerenciar Códigos de Convite de Acesso" class="px-2 py-1.5 text-amber-300 hover:text-white rounded-lg hover:bg-emerald-800 text-xs transition-colors flex items-center gap-1 font-semibold border border-amber-400/40 bg-emerald-950/40">
-            <span>🔑</span> <span class="hidden md:inline">Convites</span>
-          </button>
+            <!-- BOTÃO GERENCIAR CÓDIGOS DE CONVITE -->
+            <button onclick="abrirModalConvites()" title="Gerenciar Códigos de Convite de Acesso" class="px-2.5 py-1.5 text-amber-300 hover:text-white rounded-lg hover:bg-emerald-800 text-xs transition-colors flex items-center gap-1 font-semibold border border-amber-400/40 bg-emerald-950/40">
+              <span>🔑</span> <span>Convites</span>
+            </button>
 
-          <!-- ÁREA DE AUTENTICAÇÃO / USUÁRIO (MULTI-USUÁRIO) -->
-          <div id="nav-user-area" class="flex items-center border-l border-emerald-700/70 pl-2 sm:pl-3 ml-1">
-            <div id="nav-auth-deslogado" class="flex items-center gap-1.5">
-              <button onclick="abrirModalAuth('login')" class="text-xs text-emerald-100 hover:text-white hover:bg-emerald-800 px-2.5 py-1.5 rounded-lg font-medium transition-colors">
-                Entrar
-              </button>
-              <button onclick="abrirModalAuth('cadastro')" class="text-xs bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-3 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1">
-                <span>⭐</span> <span class="hidden md:inline">Criar Minha Planilha</span><span class="md:hidden">Cadastrar</span>
-              </button>
-            </div>
-
-            <div id="nav-auth-logado" class="hidden items-center gap-2">
-              <div class="flex items-center gap-1.5 bg-emerald-800/90 px-2.5 py-1 rounded-lg border border-emerald-600/70 shadow-inner">
-                <span class="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">👤</span>
-                <span id="nav-user-nome" class="text-xs font-semibold text-white max-w-[110px] sm:max-w-[160px] truncate">Produtor</span>
+            <!-- ÁREA DE AUTENTICAÇÃO / USUÁRIO (DESKTOP) -->
+            <div id="nav-user-area" class="flex items-center border-l border-emerald-700/70 pl-2 sm:pl-3 ml-1">
+              <div id="nav-auth-deslogado" class="flex items-center gap-1.5">
+                <button onclick="abrirModalAuth('login')" class="text-xs text-emerald-100 hover:text-white hover:bg-emerald-800 px-2.5 py-1.5 rounded-lg font-medium transition-colors">
+                  Entrar
+                </button>
+                <button onclick="abrirModalAuth('cadastro')" class="text-xs bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-3 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1">
+                  <span>⭐</span> <span>Criar Minha Planilha</span>
+                </button>
               </div>
-              <button onclick="fazerLogout()" title="Sair da Conta" class="text-xs text-emerald-300 hover:text-red-300 hover:bg-emerald-800 px-2 py-1.5 rounded-lg transition-colors font-medium flex items-center gap-1">
-                <span>🚪</span> <span class="hidden sm:inline">Sair</span>
-              </button>
+
+              <div id="nav-auth-logado" class="hidden items-center gap-2">
+                <div class="flex items-center gap-1.5 bg-emerald-800/90 px-2.5 py-1 rounded-lg border border-emerald-600/70 shadow-inner">
+                  <span class="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">👤</span>
+                  <span id="nav-user-nome" class="text-xs font-semibold text-white max-w-[120px] truncate">Produtor</span>
+                </div>
+                <button onclick="fazerLogout()" title="Sair da Conta" class="text-xs text-emerald-300 hover:text-red-300 hover:bg-emerald-800 px-2 py-1.5 rounded-lg transition-colors font-medium flex items-center gap-1">
+                  <span>🚪</span> <span>Sair</span>
+                </button>
+              </div>
             </div>
           </div>
+
+          <!-- BOTÃO HAMBÚRGUER / MENU MOBILE (Apenas no Celular e Telas Menores) -->
+          <div class="md:hidden flex items-center gap-1">
+            <button onclick="toggleMenuMobile()" class="p-2 text-emerald-200 hover:text-white hover:bg-emerald-800 rounded-xl transition-colors focus:outline-none flex items-center justify-center text-lg touch-target" title="Menu de Opções">
+              <span>☰</span>
+            </button>
+          </div>
+
         </div>
 
       </div>
     </div>
   </nav>
+
+  <!-- MENU MOBILE RETRÁTIL / DRAWER LATERAL (CELULARES & TABLETS) -->
+  <div id="menu-mobile-drawer" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm transition-opacity">
+    <div class="fixed inset-y-0 right-0 max-w-xs w-full bg-slate-900 text-white shadow-2xl p-5 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
+      
+      <!-- Topo do Drawer -->
+      <div>
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">🐂</span>
+            <div>
+              <h3 class="font-bold text-base text-white">AgroLote Móvel</h3>
+              <p class="text-[11px] text-emerald-400">Menu Rápido do Produtor</p>
+            </div>
+          </div>
+          <button onclick="fecharMenuMobile()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-lg font-bold">
+            ✕
+          </button>
+        </div>
+
+        <!-- Seção de Ações Rápidas -->
+        <div class="mt-5 space-y-2.5">
+          <button onclick="fecharMenuMobile(); abrirModalNovoLote()" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md flex items-center gap-2.5 touch-target">
+            <span class="text-lg">➕</span> Criar Novo Lote de Animais
+          </button>
+
+          <button onclick="fecharMenuMobile(); abrirModalConvites()" class="w-full py-3 px-4 rounded-xl bg-amber-500/20 border border-amber-400/40 hover:bg-amber-500/30 text-amber-300 font-bold text-sm flex items-center gap-2.5 touch-target">
+            <span class="text-lg">🔑</span> Gerenciador de Convites
+          </button>
+
+          <a href="/api/backup" download="backup_pecuaria.json" onclick="fecharMenuMobile()" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm flex items-center gap-2.5 touch-target">
+            <span class="text-lg">💾</span> Baixar Backup da Planilha
+          </a>
+        </div>
+
+        <!-- Divisor -->
+        <div class="my-5 border-t border-slate-800"></div>
+
+        <!-- Status da Conta do Usuário no Celular -->
+        <div class="space-y-3">
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Minha Conta:</div>
+          
+          <div id="drawer-auth-deslogado" class="space-y-2">
+            <button onclick="fecharMenuMobile(); abrirModalAuth('login')" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 font-bold text-xs flex items-center justify-center gap-2">
+              <span>👤</span> Já Tenho Conta (Entrar)
+            </button>
+            <button onclick="fecharMenuMobile(); abrirModalAuth('cadastro')" class="w-full py-2.5 px-4 rounded-xl bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-sm">
+              <span>⭐</span> Cadastrar com Código
+            </button>
+          </div>
+
+          <div id="drawer-auth-logado" class="hidden space-y-2">
+            <div class="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800/60 flex items-center gap-3">
+              <span class="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-sm font-bold text-white shadow">👤</span>
+              <div class="overflow-hidden">
+                <div id="drawer-user-nome" class="font-bold text-sm text-white truncate">Produtor</div>
+                <div class="text-[10px] text-emerald-400 font-medium">Conta Conectada</div>
+              </div>
+            </div>
+            <button onclick="fecharMenuMobile(); fazerLogout()" class="w-full py-2.5 px-4 rounded-xl bg-red-950/40 border border-red-800/40 hover:bg-red-900/50 text-red-300 font-bold text-xs flex items-center justify-center gap-2">
+              <span>🚪</span> Sair da Conta
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Rodapé do Drawer -->
+      <div class="pt-4 border-t border-slate-800 text-center">
+        <p class="text-[11px] text-slate-500">AgroLote Pecuária Nordeste • v2.0</p>
+      </div>
+
+    </div>
+  </div>
+
 
   <!-- BANNER INTELIGENTE DE STATUS / DEMONSTRAÇÃO (SOMENTE LEITURA) -->
   <div id="banner-visitante" class="bg-gradient-to-r from-amber-600 via-emerald-700 to-teal-800 text-white text-xs py-2 px-4 shadow-inner">
@@ -157,41 +265,41 @@
     </div>
   </div>
 
-  <!-- CONTEÚDO PRINCIPAL -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+  <!-- CONTEÚDO PRINCIPAL (OTIMIZADO PARA CELULAR, TABLET E COMPUTADOR) -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-28 md:pb-8">
 
     <!-- BARRA DE STATUS DO LOTE SELECIONADO -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div class="flex items-start gap-3">
-        <div id="lote-icone-badge" class="w-12 h-12 rounded-2xl bg-emerald-100/70 border border-emerald-300/60 flex items-center justify-center text-3xl shrink-0">
+    <div class="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+      <div class="flex items-center gap-3">
+        <div id="lote-icone-badge" class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-100/70 border border-emerald-300/60 flex items-center justify-center text-2xl sm:text-3xl shrink-0">
           🐂
         </div>
-        <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h2 id="lote-titulo" class="text-xl sm:text-2xl font-bold text-slate-900">Carregando lote...</h2>
-            <span id="lote-especie-badge" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+        <div class="overflow-hidden">
+          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <h2 id="lote-titulo" class="text-base sm:text-2xl font-bold text-slate-900 truncate">Carregando lote...</h2>
+            <span id="lote-especie-badge" class="px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
               Bovinos
             </span>
-            <span id="lote-status-badge" class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
+            <span id="lote-status-badge" class="px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
               Ativo
             </span>
           </div>
-          <p id="lote-subtitulo" class="text-xs sm:text-sm text-slate-500 mt-1">
+          <p id="lote-subtitulo" class="text-[11px] sm:text-sm text-slate-500 mt-0.5 sm:mt-1 truncate">
             Lote com 6 animais • Ciclo de 120 dias
           </p>
         </div>
       </div>
 
       <!-- Barra de Progresso do Ciclo -->
-      <div class="w-full md:w-80 bg-slate-50 border border-slate-200 rounded-xl p-3">
-        <div class="flex justify-between items-center text-xs text-slate-600 mb-1 font-medium">
+      <div class="w-full md:w-80 bg-slate-50 border border-slate-200 rounded-xl p-2.5 sm:p-3">
+        <div class="flex justify-between items-center text-[11px] sm:text-xs text-slate-600 mb-1 font-medium">
           <span id="txt-progresso-dias">Dia 30 de 120 dias</span>
           <span id="txt-progresso-pct" class="font-bold text-emerald-700">25%</span>
         </div>
-        <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
-          <div id="barra-progresso" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-500" style="width: 25%"></div>
+        <div class="w-full bg-slate-200 h-2 sm:h-2.5 rounded-full overflow-hidden">
+          <div id="barra-progresso" class="bg-emerald-600 h-2 sm:h-2.5 rounded-full transition-all duration-500" style="width: 25%"></div>
         </div>
-        <div class="flex justify-between items-center text-[11px] text-slate-400 mt-1">
+        <div class="flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400 mt-1">
           <span id="txt-data-entrada">Início: 01/01/2026</span>
           <span id="txt-data-abate">Abate: 01/05/2026</span>
         </div>
@@ -199,121 +307,122 @@
     </div>
 
     <!-- PAINEL DE RESUMO EXECUTIVO REAL: ESTUDO DE CASO DE 5 ANIMAIS -->
-    <div class="bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-emerald-500/30 relative overflow-hidden">
+    <div class="bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl border border-emerald-500/30 relative overflow-hidden">
       <!-- Efeito de brilho de fundo -->
       <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none"></div>
 
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-emerald-700/60 pb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-2xl shadow-inner">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-700/60 pb-3 sm:pb-4">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-xl sm:text-2xl shadow-inner shrink-0">
             🐂
           </div>
           <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-[11px] bg-amber-400 text-slate-950 font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[10px] sm:text-[11px] bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                 Exemplo Real de Mercado
               </span>
-              <span class="text-xs text-emerald-300 font-semibold">Índices Zootécnicos Reais (Embrapa / Cepea / B3)</span>
+              <span class="text-[10px] sm:text-xs text-emerald-300 font-semibold">Índices Zootécnicos Reais</span>
             </div>
-            <h3 class="text-lg sm:text-xl font-bold mt-0.5">Engorda Confinada de 5 Garrotes Nelore (Ciclo de 90 Dias)</h3>
+            <h3 class="text-sm sm:text-xl font-bold mt-0.5 leading-snug">Engorda Confinada de 5 Garrotes Nelore (90 Dias)</h3>
           </div>
         </div>
-        <div class="flex items-center gap-2 bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-700/50 text-xs">
+        <div class="flex items-center gap-2 bg-emerald-950/60 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-emerald-700/50 text-[11px] sm:text-xs shrink-0 self-start sm:self-auto">
           <span class="text-emerald-400 font-bold">Lote Padrão:</span>
-          <span>5 cabeças • 360 kg entrada ➔ 510 kg abate</span>
+          <span>5 cabeças • 360kg ➔ 510kg</span>
         </div>
       </div>
 
-      <!-- 4 Passos do Ciclo Real -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 text-xs">
+      <!-- 4 Passos do Ciclo Real (Grid Responsivo para Celular e Tablet) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mt-3 sm:mt-4 text-xs">
         
         <!-- Passo 1 -->
-        <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
-          <div class="text-[11px] font-bold text-emerald-400 uppercase tracking-wide flex items-center justify-between">
+        <div class="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 backdrop-blur-sm">
+          <div class="text-[10px] sm:text-[11px] font-bold text-emerald-400 uppercase tracking-wide flex items-center justify-between">
             <span>1. Compra do Magro</span>
             <span class="text-slate-400 font-normal">Entrada</span>
           </div>
-          <div class="text-base font-extrabold text-white mt-1">R$ 2.550,00 <span class="text-xs text-slate-300 font-normal">/ cab</span></div>
-          <p class="text-[11px] text-slate-300 mt-1">Peso entrada: <strong>360 kg (12@)</strong> + Frete R$ 80/cab. Investimento inicial total: R$ 13.150,00.</p>
+          <div class="text-sm sm:text-base font-extrabold text-white mt-1">R$ 2.550,00 <span class="text-[11px] text-slate-300 font-normal">/ cab</span></div>
+          <p class="text-[10px] sm:text-[11px] text-slate-300 mt-1">Peso: <strong>360 kg (12@)</strong> + Frete R$ 80/cab. Investimento inicial: R$ 13.150,00.</p>
         </div>
 
         <!-- Passo 2 -->
-        <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
-          <div class="text-[11px] font-bold text-amber-300 uppercase tracking-wide flex items-center justify-between">
+        <div class="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 backdrop-blur-sm">
+          <div class="text-[10px] sm:text-[11px] font-bold text-amber-300 uppercase tracking-wide flex items-center justify-between">
             <span>2. Trato e Ração</span>
             <span class="text-slate-400 font-normal">90 dias</span>
           </div>
-          <div class="text-base font-extrabold text-white mt-1">R$ 12,18 <span class="text-xs text-slate-300 font-normal">/ dia / cab</span></div>
-          <p class="text-[11px] text-slate-300 mt-1">Silagem nobre + Ração 18% PB + Núcleo mineral. Ganho diário real: <strong>+1,65 kg/dia</strong>.</p>
+          <div class="text-sm sm:text-base font-extrabold text-white mt-1">R$ 12,18 <span class="text-[11px] text-slate-300 font-normal">/ dia / cab</span></div>
+          <p class="text-[10px] sm:text-[11px] text-slate-300 mt-1">Silagem nobre + Ração 18% PB + Núcleo mineral. Ganho diário: <strong>+1,65 kg/dia</strong>.</p>
         </div>
 
         <!-- Passo 3 -->
-        <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-sm">
-          <div class="text-[11px] font-bold text-sky-300 uppercase tracking-wide flex items-center justify-between">
+        <div class="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 backdrop-blur-sm">
+          <div class="text-[10px] sm:text-[11px] font-bold text-sky-300 uppercase tracking-wide flex items-center justify-between">
             <span>3. Saída no Abate</span>
-            <span class="text-slate-400 font-normal">54% rendimento</span>
+            <span class="text-slate-400 font-normal">54% carcaça</span>
           </div>
-          <div class="text-base font-extrabold text-white mt-1">18,36 Arrobas (@) <span class="text-xs text-slate-300 font-normal">/ boi</span></div>
-          <p class="text-[11px] text-slate-300 mt-1">Peso final de <strong>510 kg vivo</strong> (275,4 kg carne limpa). Venda a <strong>R$ 248,00/@</strong> = R$ 4.553,28/cab.</p>
+          <div class="text-sm sm:text-base font-extrabold text-white mt-1">18,36 Arrobas (@) <span class="text-[11px] text-slate-300 font-normal">/ boi</span></div>
+          <p class="text-[10px] sm:text-[11px] text-slate-300 mt-1">Peso final: <strong>510 kg vivo</strong> (275,4 kg carne). Venda a <strong>R$ 248,00/@</strong>.</p>
         </div>
 
         <!-- Passo 4 -->
-        <div class="bg-emerald-500/20 border border-emerald-400/40 rounded-2xl p-3.5 backdrop-blur-sm">
-          <div class="text-[11px] font-bold text-emerald-300 uppercase tracking-wide flex items-center justify-between">
+        <div class="bg-emerald-500/20 border border-emerald-400/40 rounded-xl sm:rounded-2xl p-3 sm:p-3.5 backdrop-blur-sm">
+          <div class="text-[10px] sm:text-[11px] font-bold text-emerald-300 uppercase tracking-wide flex items-center justify-between">
             <span>4. Lucro no Bolso</span>
-            <span class="bg-emerald-400 text-slate-950 font-black px-1.5 py-0.2 rounded text-[10px]">ROI 18,5%</span>
+            <span class="bg-emerald-400 text-slate-950 font-black px-1.5 py-0.2 rounded text-[9px] sm:text-[10px]">ROI 18,5%</span>
           </div>
-          <div class="text-base font-black text-emerald-300 mt-1">+R$ 3.558,90 <span class="text-xs text-slate-200 font-normal">total</span></div>
-          <p class="text-[11px] text-emerald-100 mt-1"><strong>+R$ 711,78 de lucro líquido por boi</strong> limpo após abater compra, ração, remédios e fretes!</p>
+          <div class="text-sm sm:text-base font-black text-emerald-300 mt-1">+R$ 3.558,90 <span class="text-[11px] text-slate-200 font-normal">total</span></div>
+          <p class="text-[10px] sm:text-[11px] text-emerald-100 mt-1"><strong>+R$ 711,78 de lucro líquido por boi</strong> limpo após abater todos os custos!</p>
         </div>
 
       </div>
     </div>
 
-    <!-- CARDS DE MÉTRICAS E RESULTADOS FINANCEIROS (KPIs) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- CARDS DE MÉTRICAS E RESULTADOS FINANCEIROS (KPIs) - GRID 2x2 EM CELULARES E 4 COLUNAS EM TABLETS/DESKTOP -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
 
       <!-- CARD 1: CUSTO TOTAL ACUMULADO -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative">
-        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Custo Total Acumulado</div>
-        <div id="card-custo-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">R$ 0,00</div>
-        <div class="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
+      <div class="bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm hover:shadow-md transition-shadow relative">
+        <div class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider truncate">Custo Total</div>
+        <div id="card-custo-total" class="text-base sm:text-2xl lg:text-3xl font-extrabold text-slate-900 mt-0.5 sm:mt-1 truncate">R$ 0,00</div>
+        <div class="flex flex-col xs:flex-row xs:items-center justify-between text-[10px] sm:text-xs text-slate-500 mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-slate-100">
           <span>Por cabeça:</span>
-          <span id="card-custo-cabeca" class="font-semibold text-slate-700">R$ 0,00</span>
+          <span id="card-custo-cabeca" class="font-semibold text-slate-700 truncate">R$ 0,00</span>
         </div>
       </div>
 
       <!-- CARD 2: GASTO COM RAÇÃO -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative">
-        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ração & Nutrição</div>
-        <div id="card-total-racao" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">R$ 0,00</div>
-        <div class="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
-          <span>Diária alimentar:</span>
-          <span id="card-diaria-cabeca" class="font-semibold text-slate-700">R$ 0,00 / dia</span>
+      <div class="bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm hover:shadow-md transition-shadow relative">
+        <div class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider truncate">Ração & Trato</div>
+        <div id="card-total-racao" class="text-base sm:text-2xl lg:text-3xl font-extrabold text-amber-600 mt-0.5 sm:mt-1 truncate">R$ 0,00</div>
+        <div class="flex flex-col xs:flex-row xs:items-center justify-between text-[10px] sm:text-xs text-slate-500 mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-slate-100">
+          <span>Diária/cab:</span>
+          <span id="card-diaria-cabeca" class="font-semibold text-slate-700 truncate">R$ 0,00</span>
         </div>
       </div>
 
       <!-- CARD 3: MEDICAMENTOS E SAÚDE -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative">
-        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Medicamentos & Vacinas</div>
-        <div id="card-total-med" class="text-2xl sm:text-3xl font-extrabold text-blue-600 mt-1">R$ 0,00</div>
-        <div class="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
-          <span>Custo sanitário:</span>
-          <span id="card-med-cabeca" class="font-semibold text-slate-700">R$ 0,00 / animal</span>
+      <div class="bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm hover:shadow-md transition-shadow relative">
+        <div class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider truncate">Vacinas/Saúde</div>
+        <div id="card-total-med" class="text-base sm:text-2xl lg:text-3xl font-extrabold text-blue-600 mt-0.5 sm:mt-1 truncate">R$ 0,00</div>
+        <div class="flex flex-col xs:flex-row xs:items-center justify-between text-[10px] sm:text-xs text-slate-500 mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-slate-100">
+          <span>Por animal:</span>
+          <span id="card-med-cabeca" class="font-semibold text-slate-700 truncate">R$ 0,00</span>
         </div>
       </div>
 
       <!-- CARD 4: LUCRO LÍQUIDO FINAL -->
-      <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/40 border-2 border-emerald-500/40 rounded-2xl p-5 shadow-sm relative">
-        <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Lucro Líquido do Lote</div>
-        <div id="card-lucro-total" class="text-2xl sm:text-3xl font-black text-emerald-700 mt-1">R$ 0,00</div>
-        <div class="flex items-center justify-between text-xs text-emerald-800 mt-2 pt-2 border-t border-emerald-200/60 font-medium">
-          <span>Lucro por animal:</span>
-          <span id="card-lucro-cabeca" class="font-bold text-emerald-900 text-sm">R$ 0,00</span>
+      <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/40 border-2 border-emerald-500/40 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm relative">
+        <div class="text-[10px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider truncate">Lucro Líquido</div>
+        <div id="card-lucro-total" class="text-base sm:text-2xl lg:text-3xl font-black text-emerald-700 mt-0.5 sm:mt-1 truncate">R$ 0,00</div>
+        <div class="flex flex-col xs:flex-row xs:items-center justify-between text-[10px] sm:text-xs text-emerald-800 mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-emerald-200/60 font-medium">
+          <span>Por cabeça:</span>
+          <span id="card-lucro-cabeca" class="font-bold text-emerald-900 truncate">R$ 0,00</span>
         </div>
       </div>
 
     </div>
+
 
     <!-- NAVEGAÇÃO ENTRE ABAS -->
     <div class="border-b border-slate-200 flex gap-2 sm:gap-6 overflow-x-auto text-sm font-semibold">
@@ -1477,6 +1586,43 @@
           </button>
         </div>
       </div>
+
+  <!-- ============================================================== -->
+  <!-- BARRA DE NAVEGAÇÃO INFERIOR FIXA (MOBILE BOTTOM NAVIGATION)   -->
+  <!-- Típica de aplicativos móveis (estilo iOS/Android App)        -->
+  <!-- ============================================================== -->
+  <div class="bottom-nav-mobile fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.07)] md:hidden">
+    <div class="flex items-center justify-around h-16 max-w-lg mx-auto px-1.5 pb-safe">
+      
+      <!-- 1. Ração -->
+      <button onclick="mudarAba('racao')" id="bnav-btn-racao" class="flex flex-col items-center justify-center flex-1 py-1 text-emerald-600 font-bold transition-colors touch-target">
+        <span class="text-xl leading-none">🌾</span>
+        <span class="text-[10px] mt-1 font-semibold leading-none">Ração</span>
+      </button>
+
+      <!-- 2. Medicamento -->
+      <button onclick="mudarAba('medicamento')" id="bnav-btn-medicamento" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-slate-700 font-medium transition-colors touch-target">
+        <span class="text-xl leading-none">💉</span>
+        <span class="text-[10px] mt-1 font-semibold leading-none">Remédios</span>
+      </button>
+
+      <!-- 3. Fechamento e Venda -->
+      <button onclick="mudarAba('fechamento')" id="bnav-btn-fechamento" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-slate-700 font-medium transition-colors touch-target">
+        <span class="text-xl leading-none">⚖️</span>
+        <span class="text-[10px] mt-1 font-semibold leading-none">Abate/Lucro</span>
+      </button>
+
+      <!-- 4. Animais -->
+      <button onclick="mudarAba('animais')" id="bnav-btn-animais" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-slate-700 font-medium transition-colors touch-target">
+        <span class="text-xl leading-none">📋</span>
+        <span class="text-[10px] mt-1 font-semibold leading-none">Pesagem</span>
+      </button>
+
+      <!-- 5. Relatórios -->
+      <button onclick="mudarAba('relatorios')" id="bnav-btn-relatorios" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-slate-700 font-medium transition-colors touch-target">
+        <span class="text-xl leading-none">📊</span>
+        <span class="text-[10px] mt-1 font-semibold leading-none">Relatórios</span>
+      </button>
 
     </div>
   </div>
