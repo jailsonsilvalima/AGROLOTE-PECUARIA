@@ -814,18 +814,83 @@ async function carregarLotes() {
       atualizarSelectLotes(loteEncontrado.id);
       renderLote(loteEncontrado);
     } else {
-      lotes = [];
-      loteAtual = null;
-      const select = document.getElementById('select-lote');
-      if (select) select.innerHTML = '<option value="">Nenhum lote cadastrado</option>';
-      const tit = document.getElementById('lote-titulo');
-      if (tit) tit.textContent = 'Nenhum lote cadastrado';
-      const sub = document.getElementById('lote-subtitulo');
-      if (sub) sub.textContent = 'Clique em "+ Novo Lote" para cadastrar seu primeiro lote de animais.';
+      limparInterfaceLoteVazio();
     }
   } catch (err) {
     console.error('Erro ao conectar com a API:', err);
   }
+}
+
+// Limpa totalmente a tela quando o produtor ainda não cadastrou nenhum lote (plataforma limpa)
+function limparInterfaceLoteVazio() {
+  lotes = [];
+  loteAtual = null;
+  localStorage.removeItem('loteSelecionadoId');
+
+  const select = document.getElementById('select-lote');
+  if (select) select.innerHTML = '<option value="">Nenhum lote cadastrado</option>';
+
+  const tit = document.getElementById('lote-titulo');
+  if (tit) tit.textContent = 'Sua Fazenda está Pronta!';
+
+  const sub = document.getElementById('lote-subtitulo');
+  if (sub) sub.textContent = 'Você não possui nenhum lote cadastrado ainda. Clique em "+ Novo Lote" para cadastrar seus primeiros animais.';
+
+  const iconeNav = document.getElementById('nav-animal-icone');
+  if (iconeNav) iconeNav.textContent = '🌾';
+  const iconeBadge = document.getElementById('lote-icone-badge');
+  if (iconeBadge) iconeBadge.textContent = '🌾';
+  const espBadge = document.getElementById('lote-especie-badge');
+  if (espBadge) espBadge.textContent = 'Minha Fazenda';
+
+  const statusBadge = document.getElementById('lote-status-badge');
+  if (statusBadge) {
+    statusBadge.textContent = 'Sem Lotes';
+    statusBadge.className = 'px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600';
+  }
+
+  const txtProgresso = document.getElementById('txt-progresso-dias');
+  if (txtProgresso) txtProgresso.textContent = '0 dias';
+  const txtPct = document.getElementById('txt-progresso-pct');
+  if (txtPct) txtPct.textContent = '0%';
+  const barra = document.getElementById('barra-progresso');
+  if (barra) barra.style.width = '0%';
+
+  const txtEntrada = document.getElementById('txt-data-entrada');
+  if (txtEntrada) txtEntrada.textContent = 'Início: --/--/----';
+  const txtAbate = document.getElementById('txt-data-abate');
+  if (txtAbate) txtAbate.textContent = 'Abate: --/--/----';
+
+  // Zerar KPIs
+  const cardCusto = document.getElementById('card-custo-total');
+  if (cardCusto) cardCusto.textContent = 'R$ 0,00';
+  const cardCabeca = document.getElementById('card-custo-cabeca');
+  if (cardCabeca) cardCabeca.textContent = 'R$ 0,00 / animal';
+  const cardRacao = document.getElementById('card-total-racao');
+  if (cardRacao) cardRacao.textContent = 'R$ 0,00';
+  const cardDiaria = document.getElementById('card-diaria-cabeca');
+  if (cardDiaria) cardDiaria.textContent = 'R$ 0,00 / dia';
+  const cardMed = document.getElementById('card-total-med');
+  if (cardMed) cardMed.textContent = 'R$ 0,00';
+  const cardMedCab = document.getElementById('card-med-cabeca');
+  if (cardMedCab) cardMedCab.textContent = 'R$ 0,00 / animal';
+  const cardLucro = document.getElementById('card-lucro-total');
+  if (cardLucro) {
+    cardLucro.textContent = 'R$ 0,00';
+    cardLucro.className = 'text-2xl sm:text-3xl font-black text-slate-600 mt-1';
+  }
+  const cardLucroCab = document.getElementById('card-lucro-cabeca');
+  if (cardLucroCab) cardLucroCab.textContent = 'R$ 0,00 / animal';
+
+  // Zerar tabelas
+  const tbodyRacao = document.getElementById('tabela-racao-body');
+  if (tbodyRacao) tbodyRacao.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 text-sm">Nenhuma despesa de ração. Cadastre um novo lote para começar!</td></tr>';
+
+  const tbodyMed = document.getElementById('tabela-med-body');
+  if (tbodyMed) tbodyMed.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 text-sm">Nenhum medicamento registrado. Cadastre um novo lote para começar!</td></tr>';
+
+  const tbodyAnimais = document.getElementById('tabela-animais-body');
+  if (tbodyAnimais) tbodyAnimais.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400 text-sm">Nenhum animal cadastrado.</td></tr>';
 }
 
 // Atualizar o dropdown de seleção de lotes
