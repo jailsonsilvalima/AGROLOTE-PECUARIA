@@ -421,6 +421,7 @@ function abrirModalConvites() {
   const modal = document.getElementById('modal-convites');
   if (!modal) return;
   modal.classList.remove('hidden');
+  alternarSubAbaConvites('links');
   carregarConvites();
 }
 
@@ -429,9 +430,62 @@ function fecharModalConvites() {
   if (modal) modal.classList.add('hidden');
 }
 
+function exibirFeedbackConvite(tipo, texto) {
+  const box = document.getElementById('convite-msg-feedback');
+  if (!box) return;
+  box.className = tipo === 'erro' 
+    ? 'rounded-2xl p-3.5 text-xs font-semibold flex items-start gap-2 bg-red-50 border border-red-300 text-red-900 animate-in fade-in'
+    : 'rounded-2xl p-3.5 text-xs font-semibold flex items-start gap-2 bg-emerald-50 border border-emerald-300 text-emerald-900 animate-in fade-in';
+  box.innerHTML = `<span>${tipo === 'erro' ? '⚠️' : '✅'}</span> <div>${texto}</div>`;
+  box.classList.remove('hidden');
+}
+
+function alternarSubAbaConvites(aba) {
+  const btnLinks = document.getElementById('tab-convites-links');
+  const btnResgates = document.getElementById('tab-convites-resgates');
+  const divLinks = document.getElementById('subaba-convites-links');
+  const divResgates = document.getElementById('subaba-convites-resgates');
+
+  if (aba === 'links') {
+    if (btnLinks) {
+      btnLinks.className = "flex-1 py-2 px-3 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5";
+    }
+    if (btnResgates) {
+      btnResgates.className = "flex-1 py-2 px-3 rounded-xl bg-amber-900/40 text-amber-100 hover:bg-amber-900/60 font-semibold text-xs transition-all flex items-center justify-center gap-1.5";
+    }
+    if (divLinks) divLinks.classList.remove('hidden');
+    if (divResgates) divResgates.classList.add('hidden');
+    carregarConvites();
+  } else {
+    if (btnResgates) {
+      btnResgates.className = "flex-1 py-2 px-3 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5";
+    }
+    if (btnLinks) {
+      btnLinks.className = "flex-1 py-2 px-3 rounded-xl bg-amber-900/40 text-amber-100 hover:bg-amber-900/60 font-semibold text-xs transition-all flex items-center justify-center gap-1.5";
+    }
+    if (divLinks) divLinks.classList.add('hidden');
+    if (divResgates) divResgates.classList.remove('hidden');
+    carregarUsuariosAdmin();
+  }
+}
+
+function alternarExibicaoUsos(codSafe) {
+  const box = document.getElementById(`box-usos-${codSafe}`);
+  const btn = document.getElementById(`btn-usos-${codSafe}`);
+  if (!box) return;
+  if (box.classList.contains('hidden')) {
+    box.classList.remove('hidden');
+    if (btn) btn.innerHTML = `<span>▲ Ocultar quem cadastrou</span>`;
+  } else {
+    box.classList.add('hidden');
+    if (btn) btn.innerHTML = `<span>👥 Ver quem cadastrou</span>`;
+  }
+}
+
 async function carregarConvites() {
   const container = document.getElementById('lista-convites-container');
   const badge = document.getElementById('convites-total-badge');
+  const badgeResgates = document.getElementById('badge-total-resgatados');
   if (!container) return;
 
   container.innerHTML = '<div class="text-xs text-slate-500 py-4 text-center">Carregando seus links de convite...</div>';
@@ -443,22 +497,28 @@ async function carregarConvites() {
       if (badge) badge.textContent = `${data.convites.length} links ativos`;
       container.innerHTML = '';
 
+      let totalPessoasResgataram = 0;
+
       if (data.convites.length === 0) {
         container.innerHTML = '<div class="text-xs text-slate-400 py-4 text-center">Nenhum link ativo no momento. Crie um novo acima!</div>';
         return;
       }
 
       data.convites.forEach(c => {
+        const codSafe = c.codigo.replace(/[^a-zA-Z0-9]/g, '_');
         const link = `${window.location.origin}/?convite=${encodeURIComponent(c.codigo)}`;
+        const totalUsos = Number(c.totalUsos) || 0;
+        totalPessoasResgataram += totalUsos;
+
         const item = document.createElement('div');
-        item.className = "bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2 hover:border-amber-300 transition-all";
+        item.className = "bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5 hover:border-amber-300 transition-all";
         
         const badgeRole = c.isAdmin 
           ? '<span class="text-[9px] bg-red-100 text-red-800 font-extrabold px-2 py-0.5 rounded-full border border-red-300">ADMIN MASTER</span>' 
           : '<span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-300">PRODUTOR</span>';
         
-        const badgeUsos = `<span class="text-[10px] ${c.totalUsos > 0 ? 'bg-blue-100 text-blue-800 font-bold' : 'bg-slate-100 text-slate-600 font-semibold'} px-2 py-0.5 rounded-full">
-          👥 ${c.totalUsos} de ${c.maxUsos} cadastrados
+        const badgeUsos = `<span class="text-[10px] ${totalUsos > 0 ? 'bg-blue-100 text-blue-800 font-bold border border-blue-200' : 'bg-slate-100 text-slate-600 font-semibold'} px-2 py-0.5 rounded-full">
+          👥 ${totalUsos} de ${c.maxUsos} cadastrados
         </span>`;
 
         const btnExcluir = c.isAdmin ? '' : `
@@ -466,6 +526,47 @@ async function carregarConvites() {
             🗑️
           </button>
         `;
+
+        // Renderizar lista de usuários que usaram este código
+        let htmlPessoas = '';
+        if (c.usadoPor && c.usadoPor.length > 0) {
+          const listaItens = c.usadoPor.map(u => {
+            const dataFmt = u.usadoEm ? new Date(u.usadoEm).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Data recente';
+            return `
+              <div class="bg-amber-50/70 p-2 rounded-xl border border-amber-200/80 flex items-center justify-between text-xs gap-2">
+                <div>
+                  <p class="font-bold text-slate-800 flex items-center gap-1">
+                    <span>👤</span> ${u.nome || 'Produtor'}
+                  </p>
+                  <p class="text-[11px] font-mono text-emerald-800 font-semibold flex items-center gap-1">
+                    <span>✉️</span> ${u.email}
+                  </p>
+                </div>
+                <span class="text-[10px] text-slate-500 whitespace-nowrap bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                  ${dataFmt}
+                </span>
+              </div>
+            `;
+          }).join('');
+
+          htmlPessoas = `
+            <div class="pt-1">
+              <button type="button" id="btn-usos-${codSafe}" onclick="alternarExibicaoUsos('${codSafe}')" class="text-[11px] text-amber-800 hover:text-amber-950 font-bold flex items-center gap-1 hover:underline">
+                <span>👥</span> Ver quem cadastrou (${c.usadoPor.length} pessoas)
+              </button>
+              <div id="box-usos-${codSafe}" class="hidden mt-2 space-y-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Produtores que resgataram este link:</p>
+                ${listaItens}
+              </div>
+            </div>
+          `;
+        } else {
+          htmlPessoas = `
+            <div class="text-[11px] text-slate-400 italic flex items-center gap-1">
+              <span>⚪</span> Nenhum produtor utilizou este link ainda (vagas livres).
+            </div>
+          `;
+        }
 
         item.innerHTML = `
           <div class="flex items-center justify-between gap-2">
@@ -493,14 +594,77 @@ async function carregarConvites() {
               <span>📲</span> WhatsApp
             </button>
           </div>
+
+          ${htmlPessoas}
         `;
         container.appendChild(item);
+      });
+
+      if (badgeResgates) badgeResgates.textContent = totalPessoasResgataram;
+    } else {
+      container.innerHTML = `<div class="text-xs text-red-500 py-3 text-center">${data.message || 'Sem permissão.'}</div>`;
+      if (data.precisaLogin) {
+        exibirFeedbackConvite('erro', `${data.message} <button onclick="abrirModalAuth('login')" class="underline font-bold ml-1">Fazer Login Agora</button>`);
+      }
+    }
+  } catch (err) {
+    container.innerHTML = '<div class="text-xs text-red-500 py-3 text-center">Erro ao carregar lista de links.</div>';
+  }
+}
+
+// Carregar lista completa de usuários cadastrados e seus e-mails
+async function carregarUsuariosAdmin() {
+  const container = document.getElementById('lista-usuarios-resgatados-container');
+  if (!container) return;
+
+  container.innerHTML = '<div class="text-xs text-slate-500 py-4 text-center">Carregando lista de produtores cadastrados...</div>';
+
+  try {
+    const res = await authFetch('/api/admin/usuarios');
+    const data = await res.json();
+    if (data.success && data.usuarios) {
+      container.innerHTML = '';
+      if (data.usuarios.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 py-4 text-center">Nenhum produtor cadastrado no sistema ainda.</div>';
+        return;
+      }
+
+      data.usuarios.forEach(u => {
+        const dataFmt = u.criadoEm && u.criadoEm !== 'N/A' 
+          ? new Date(u.criadoEm).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) 
+          : 'Data anterior';
+
+        const card = document.createElement('div');
+        card.className = "bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-amber-300 transition-all";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-bold text-xs text-slate-900">${u.nome || 'Produtor'}</span>
+              <span class="text-[9px] ${u.role === 'admin' ? 'bg-red-100 text-red-800 font-extrabold border border-red-300' : 'bg-blue-100 text-blue-800 font-bold'} px-2 py-0.5 rounded-full">
+                ${u.role === 'admin' ? 'ADMIN' : 'PRODUTOR'}
+              </span>
+            </div>
+            <p class="text-xs font-mono font-semibold text-emerald-800 mt-0.5 flex items-center gap-1">
+              <span>✉️</span> ${u.email}
+            </p>
+            <p class="text-[11px] text-slate-500 mt-0.5">
+              Código Usado: <strong class="font-mono text-amber-900 bg-amber-50 px-1 rounded border border-amber-200">${u.codigoConviteUtilizado}</strong>
+            </p>
+          </div>
+          <div class="text-left sm:text-right">
+            <span class="text-[10px] text-slate-400 block">${dataFmt}</span>
+            <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-semibold inline-block mt-0.5">
+              ${u.qtdLotes || 1} lote(s)
+            </span>
+          </div>
+        `;
+        container.appendChild(card);
       });
     } else {
       container.innerHTML = `<div class="text-xs text-red-500 py-3 text-center">${data.message || 'Sem permissão.'}</div>`;
     }
-  } catch (err) {
-    container.innerHTML = '<div class="text-xs text-red-500 py-3 text-center">Erro ao carregar lista de links.</div>';
+  } catch (e) {
+    container.innerHTML = '<div class="text-xs text-red-500 py-3 text-center">Erro ao carregar lista de produtores.</div>';
   }
 }
 
@@ -554,12 +718,16 @@ async function submeterNovoConvite(e) {
       if (inputCod) inputCod.value = '';
       if (inputDesc) inputDesc.value = '';
 
+      exibirFeedbackConvite('sucesso', `Link com código <strong>${data.convite.codigo}</strong> criado com sucesso! Envie agora pelo WhatsApp.`);
       await carregarConvites();
     } else {
-      alert(data.message || 'Erro ao gerar link de convite.');
+      exibirFeedbackConvite('erro', data.message || 'Erro ao gerar link de convite.');
+      if (data.precisaLogin) {
+        setTimeout(() => abrirModalAuth('login'), 1500);
+      }
     }
   } catch (err) {
-    alert('Erro ao conectar com o servidor para gerar link.');
+    exibirFeedbackConvite('erro', 'Erro de conexão com o servidor para gerar link.');
   } finally {
     if (btn) {
       btn.disabled = false;
