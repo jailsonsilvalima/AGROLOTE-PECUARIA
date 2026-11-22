@@ -1211,6 +1211,15 @@
       "role": "produtor",
       "codigoConviteUtilizado": null,
       "criadoEm": "2026-11-22T17:25:08.958Z"
+    },
+    {
+      "id": "usr-1795369266892",
+      "nome": "Produtor Plataforma Limpa",
+      "email": "limpo_1795369266832@teste.com",
+      "senhaHash": "956dd1d98d4a5cef5862bb9508482e14:f1ca494adb0bd98ae3a4175d6f037c623d149e54a4218b42d20333b326bf320d5fd958db6de0fd98f923e888c692faca4e7b03d398d0d6c5580ec5ceae1c9565",
+      "role": "produtor",
+      "codigoConviteUtilizado": null,
+      "criadoEm": "2026-11-22T17:41:06.893Z"
     }
   ],
   "sessoes": {
@@ -1226,7 +1235,9 @@
     "0630378d8d9496f3b0f6a63c61523456f397fcfde1d7583ab351a1d9d43b03d6": "usr-admin-master",
     "c1068f885f81b974027fef1f1e1dad478d1c896660b5f98d9cb4049536f63623": "usr-1795368308955",
     "8492301e0c7a4c8e0932d0eb84dd753b6f607ffc19912b869265aaba45f46425": "usr-1795368308958",
-    "agl_dXNyLWFkbWluLW1hc3RlcjoxNzk1MzY4ODUyNDU1.fb20505cf5ec198bab63a7adf3fb1bcb903c42fe35f7b1f9a278825464ea46bb": "usr-admin-master"
+    "agl_dXNyLWFkbWluLW1hc3RlcjoxNzk1MzY4ODUyNDU1.fb20505cf5ec198bab63a7adf3fb1bcb903c42fe35f7b1f9a278825464ea46bb": "usr-admin-master",
+    "agl_dXNyLTE3OTUzNjkyNjY4OTI6MTc5NTM2OTI2Njg5NA.a3dac37dcf8a8fcda5d70d88bbb0240bef2d7943de8b1945a1d8450523c45dae": "usr-1795369266892",
+    "agl_dXNyLWFkbWluLW1hc3RlcjoxNzk1MzY5MjY2OTI3.8af0c13a87efdea8d4da575ab8106a5ed359b5ff24906eacedbba79f0482d7e1": "usr-admin-master"
   },
   "codigosConvite": [
     {
@@ -1278,15 +1289,6 @@
       "usadoPor": [],
       "ativo": true,
       "criadoEm": "2026-11-22T17:06:01.367Z"
-    },
-    {
-      "codigo": "AGRO-TESTE-9393",
-      "descricao": "Link de teste automatizado de geracao",
-      "maxUsos": 20,
-      "isAdmin": false,
-      "usadoPor": [],
-      "ativo": true,
-      "criadoEm": "2026-11-22T17:24:39.395Z"
     }
   ]
 }
