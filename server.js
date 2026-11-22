@@ -850,21 +850,23 @@ app.get('/api/convites', autenticarUsuario, exigirAdmin, (req, res) => {
   res.json({ success: true, convites: lista });
 });
 
-// Listar todos os usuários cadastrados no sistema (SOMENTE ADMINISTRADOR)
+// Listar todos os produtores cadastrados no sistema (SOMENTE ADMINISTRADOR)
 app.get('/api/admin/usuarios', autenticarUsuario, exigirAdmin, (req, res) => {
   const db = readDb();
-  const usuarios = (db.usuarios || []).map(u => {
-    const qtdLotes = (db.lotes || []).filter(l => l.usuarioId === u.id).length;
-    return {
-      id: u.id,
-      nome: u.nome,
-      email: u.email,
-      role: u.role || 'produtor',
-      codigoConviteUtilizado: u.codigoConviteUtilizado || 'Cadastro Livre (Sem Código)',
-      criadoEm: u.criadoEm || 'N/A',
-      qtdLotes
-    };
-  });
+  const usuarios = (db.usuarios || [])
+    .filter(u => u.id !== 'usr-admin-master' && u.id !== 'usr-demo')
+    .map(u => {
+      const qtdLotes = (db.lotes || []).filter(l => l.usuarioId === u.id).length;
+      return {
+        id: u.id,
+        nome: u.nome,
+        email: u.email,
+        role: u.role || 'produtor',
+        codigoConviteUtilizado: u.codigoConviteUtilizado || 'Cadastro Livre (Sem Código)',
+        criadoEm: u.criadoEm || 'N/A',
+        qtdLotes
+      };
+    });
   res.json({ success: true, total: usuarios.length, usuarios });
 });
 
